@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"tg-keyword-reply-bot/common"
 
 	"github.com/jinzhu/gorm"
@@ -25,6 +26,7 @@ type rule struct {
 func Init(newToken string) (token string) {
 	dbtmp, err := gorm.Open("sqlite3", "data.db")
 	if err != nil {
+		fmt.Println(err)
 		panic("failed to connect database")
 	}
 	db = dbtmp
@@ -61,6 +63,7 @@ func UpdateGroupRule(groupId int64, ruleJson string) {
 	db.Model(&rule{}).Where("group_id=?", groupId).Update("rule_json", ruleJson)
 }
 
+// 读取所有的规则到内容中
 func readAllGroupRules() {
 	var allGroupRules []rule
 	db.Find(&allGroupRules)

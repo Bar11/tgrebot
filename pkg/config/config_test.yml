@@ -1,0 +1,16 @@
+version: v2.0
+# 日志配置
+log:
+  console:
+    console: true # 是否打印命令行工具端口
+    level: 4 # 日志等级
+    modules: "*" # 模块名称,显示所有"*"txPool,packer,dbManager
+    show_path: false # 是否显示打印的位置
+    use_color: true # 是否使用颜色
+  file:
+    level: 4 # 日志等级
+    save: false # 是否保存
+    file_path: "../../logs/" # 日志目录
+    file_name: "errors.json"  # 日志文件名
+a: "aaa"
+b: "bbb"
