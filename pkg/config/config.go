@@ -24,7 +24,7 @@ type Config[T any] struct {
 // LoadConfigResource 加载本地配置文件
 func LoadConfigResource[T any](configFile string, msgBus EventBus.Bus) (*Config[T], error) {
 	// 1、读取静态配置 yaml
-	// 2、校验静态文件URL是否可用，必填配置参数是否存在，若不存在抛出一场
+	// 2、校验静态文件URL是否可用，必填配置参数是否存在，若不存在抛出异常
 	// 3、将静态配置文件内容组装到config结构体中： ChainConfig LocalConfig
 	c := &Config[T]{
 		log:    logger.Log("config"),

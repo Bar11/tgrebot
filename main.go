@@ -7,7 +7,7 @@ import (
 	"github.com/chain5j/chain5j-pkg/cli"
 	"github.com/chain5j/logger"
 	"github.com/chain5j/logger/zap"
-	api "github.com/go-telegram-bot-api/telegram-bot-api"
+	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/robfig/cron"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"

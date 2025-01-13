@@ -1,4 +1,4 @@
-package main
+package history
 
 import (
 	"github.com/panjf2000/ants/v2"

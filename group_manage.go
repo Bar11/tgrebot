@@ -8,12 +8,13 @@ import (
 	"github.com/chain5j/logger"
 	"tg-keyword-reply-bot/common"
 
-	api "github.com/go-telegram-bot-api/telegram-bot-api"
+	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 // 检查是否是群组的管理员
 func checkAdmin(log logger.Logger, gid int64, user api.User) bool {
-	admins, _ := bot.GetChatAdministrators(api.ChatConfig{ChatID: gid, SuperGroupUsername: ""})
+
+	admins, _ := bot.GetChatAdministrators(api.ChatAdministratorsConfig{ChatConfig: api.ChatConfig{ChatID: gid, SuperGroupUsername: ""}})
 	uid := user.ID
 	if conf.Config().SuperUserId > 0 && uid == conf.Config().SuperUserId {
 		log.Info("user is super user", "uid", uid)
@@ -41,72 +42,78 @@ func checkInGroup(id int64) bool {
 
 // punish 惩罚
 func punish(log logger.Logger, gid int64, user api.User) {
-	botme, _ := bot.GetChatMember(api.ChatConfigWithUser{ChatID: gid, UserID: bot.Self.ID})
+	botme, _ := bot.GetChatMember(api.GetChatMemberConfig{ChatConfigWithUser: api.ChatConfigWithUser{ChatID: gid, UserID: bot.Self.ID}})
 	msg := api.NewMessage(gid, "")
 	if botme.CanRestrictMembers {
 		// 禁言60秒
 		banMember(log, gid, user.ID, 60)
-		msg.Text = "[" + user.String() + "](tg://user?id=" + strconv.Itoa(user.ID) + ")乱玩管理员命令,禁言一分钟"
+		msg.Text = "[" + user.String() + "](tg://user?id=" + strconv.FormatInt(user.ID, 10) + ")乱玩管理员命令,禁言一分钟"
 		msg.ParseMode = "Markdown"
 	} else {
-		msg.Text = "[" + user.String() + "](tg://user?id=" + strconv.Itoa(user.ID) + ")不要乱玩管理员命令"
+		msg.Text = "[" + user.String() + "](tg://user?id=" + strconv.FormatInt(user.ID, 10) + ")不要乱玩管理员命令"
 		msg.ParseMode = "Markdown"
 	}
 	sendMessage(log, msg)
 }
 
 // 禁言群员
-func banMember(log logger.Logger, gid int64, uid int, sec int64) {
+func banMember(log logger.Logger, gid int64, uid int64, sec int64) {
 	if sec <= 0 {
 		sec = 9999999999999
 	}
 	chatuserconfig := api.ChatMemberConfig{ChatID: gid, UserID: uid}
-	b := false
+	chatPermissions := &api.ChatPermissions{
+		CanSendMessages:       false,
+		CanSendMediaMessages:  false,
+		CanSendOtherMessages:  false,
+		CanAddWebPagePreviews: false,
+	}
 	restricconfig := api.RestrictChatMemberConfig{
-		ChatMemberConfig:      chatuserconfig,
-		UntilDate:             time.Now().Unix() + sec,
-		CanSendMessages:       &b,
-		CanSendMediaMessages:  &b,
-		CanSendOtherMessages:  &b,
-		CanAddWebPagePreviews: &b}
-	_, _ = bot.RestrictChatMember(restricconfig)
+		ChatMemberConfig: chatuserconfig,
+		UntilDate:        time.Now().Unix() + sec,
+		Permissions:      chatPermissions,
+	}
+	_, _ = bot.Send(restricconfig)
 }
 
 // 解除禁言
-func unbanMember(log logger.Logger, gid int64, uid int) {
+func unbanMember(log logger.Logger, gid int64, uid int64) {
 	chatuserconfig := api.ChatMemberConfig{ChatID: gid, UserID: uid}
-	b := true
+	chatPermissions := &api.ChatPermissions{
+		CanSendMessages:       true,
+		CanSendMediaMessages:  true,
+		CanSendOtherMessages:  true,
+		CanAddWebPagePreviews: true,
+	}
 	restricconfig := api.RestrictChatMemberConfig{
-		ChatMemberConfig:      chatuserconfig,
-		UntilDate:             9999999999999,
-		CanSendMessages:       &b,
-		CanSendMediaMessages:  &b,
-		CanSendOtherMessages:  &b,
-		CanAddWebPagePreviews: &b}
-	_, _ = bot.RestrictChatMember(restricconfig)
+		ChatMemberConfig: chatuserconfig,
+		UntilDate:        9999999999999,
+		Permissions:      chatPermissions,
+	}
+	_, _ = bot.Send(restricconfig)
 }
 
-// 踢出群员
-func kickMember(log logger.Logger, gid int64, uid int) {
-	cmconf := api.ChatMemberConfig{ChatID: gid, UserID: uid}
-	_, _ = bot.KickChatMember(api.KickChatMemberConfig{ChatMemberConfig: cmconf, UntilDate: 99999999999})
-}
+//// 踢出群员
+//func kickMember(log logger.Logger, gid int64, uid int64) {
+//	cmconf := api.ChatMemberConfig{ChatID: gid, UserID: uid}
+//	_, _ = bot.Send(api.KickChatMemberConfig{ChatMemberConfig: cmconf, UntilDate: 99999999999})
+//}
 
-// 解除禁止
-func unkickMember(log logger.Logger, gid int64, uid int) {
-	_, _ = bot.UnbanChatMember(api.ChatMemberConfig{ChatID: gid, UserID: uid})
-}
+//// 解除禁止
+//func unkickMember(log logger.Logger, gid int64, uid int64) {
+//	_, _ = bot.Send(api.ChatMemberConfig{ChatID: gid, UserID: uid})
+//}
 
 // 返回群组的所有管理员, 用来进行一次性@
 func getAdmins(log logger.Logger, gid int64) string {
-	admins, _ := bot.GetChatAdministrators(api.ChatConfig{ChatID: gid})
+	admins, _ := bot.GetChatAdministrators(api.ChatAdministratorsConfig{ChatConfig: api.ChatConfig{ChatID: gid}})
 	list := ""
 	for _, admin := range admins {
 		user := admin.User
 		if user.IsBot {
 			continue
 		}
-		list += "[" + user.String() + "](tg://user?id=" + strconv.Itoa(admin.User.ID) + ")\r\n"
+		list += "[" + user.String() + "](tg://user?id=" + strconv.FormatInt(admin.User.ID, 10) + ")\r\n"
 	}
 	return list
 }
