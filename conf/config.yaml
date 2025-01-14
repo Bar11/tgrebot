@@ -11,11 +11,12 @@ log:
     level: 4 # 日志等级
     save: false # 是否保存
     file_path: "./logs/" # 日志目录
-    file_name: "info.json"  # 日志文件名
+    file_name: "info.log"  # 日志文件名
 tgbot:
-#  token: "8148995474:AAHNXIwKNwya_beAmYTmaTkaP9vnTZIJw4k"
-#  super_user_id: 1214726208 # 超级管理员，默认为0
   token: "8169129152:AAGHfgLqhwpo6Oaq7o1fWokHAhnjXK3AnVk"
   super_user_id: 7875993957 # 超级管理员，默认为0
   debug: true
   chan_size: 10000
+
+  #  token: "8148995474:AAHNXIwKNwya_beAmYTmaTkaP9vnTZIJw4k"
+  #  super_user_id: 1214726208 # 超级管理员，默认为0
