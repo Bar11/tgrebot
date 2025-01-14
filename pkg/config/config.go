@@ -31,7 +31,13 @@ func LoadConfigResource[T any](configFile string, msgBus EventBus.Bus) (*Config[
 		msgBus: msgBus,
 	}
 	var localConfig T
-	err := cli.LoadConfigWithEvent(configFile, "", &localConfig, func(e fsnotify.Event) {
+	c.localConfig = &sync.Pool{
+		New: func() interface{} {
+			return localConfig
+		},
+	}
+
+	err := cli.LoadConfigWithEvent(configFile, "tgbot", &localConfig, func(e fsnotify.Event) {
 		c.log.Info("Config module watch file changed", "eventName", e.Name)
 		oldConfig := c.Config()
 		var localConfig1 T
@@ -47,12 +53,8 @@ func LoadConfigResource[T any](configFile string, msgBus EventBus.Bus) (*Config[
 		c.log.Error("load config err", "err", err)
 		return nil, err
 	}
-	c.localConfig = &sync.Pool{
-		New: func() interface{} {
-			return localConfig
-		},
-	}
-	// zap.InitWithConfig(&localConfig.Log)
+
+	//zap.InitWithConfig(&localConfig.Log)
 	return c, err
 }
 
