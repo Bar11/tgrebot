@@ -64,7 +64,7 @@ func (c *Config[T]) compareConfig(oldConfig, newConfig T) {
 		return
 	}
 
-	for key, _ := range diffCount {
+	for key := range diffCount {
 		c.msgBus.Publish(key)
 	}
 }
