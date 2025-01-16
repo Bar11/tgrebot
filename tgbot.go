@@ -143,7 +143,9 @@ func processCommand(log logger.Logger, update *api.Update) {
 		msg.Text = "本机器人能够自动回复特定关键词"
 		sendMessage(log, msg)
 	case "help":
-		msg.Text = "本机器人能够自动回复特定关键词"
+		msg.Text = helpText
+		msg.ParseMode = "Markdown"
+		msg.DisableWebPagePreview = true
 		sendMessage(log, msg)
 	case "add":
 		if checkAdmin(log, gid, *upmsg.From) {

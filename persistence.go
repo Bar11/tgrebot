@@ -11,6 +11,16 @@ import (
 )
 
 const (
+	helpText = "管理员命令:\r\n" +
+		"/add:\r\n" + addText +
+		"/del:\r\n" + delText +
+		"/list:\r\n" +
+		"/admin:\r\n" + "开发中。。。\n\n" +
+		"超级管理员命令:\r\n" +
+		"/addForAll:\r\n" + addForAllText +
+		"/delForAll:\r\n" + delForAllText +
+		"/copy:\r\n" + copyText
+
 	addText = "格式要求:\r\n" +
 		"`/add 关键字===回复内容`\r\n\r\n" +
 		"`/add 关键字1||关键字2===回复内容`\r\n\r\n" +
@@ -25,7 +35,11 @@ const (
 		"例如:\r\n" +
 		"`/addForAll 机场===https://jiji.cool`\r\n" +
 		"就会为所有群组和好友添加一条规则, 关键词是机场, 回复内容是网址"
-
+	listText = "可以查看本群`group-id`和所有自动回复规则\r\n" +
+		"例如:\r\n" +
+		"`/list `\r\n" +
+		"ID:0123456789\n\n" +
+		"回复规则。。。。。。\n\n"
 	delText = "格式要求:\r\n" +
 		"`/del 关键字`\r\n\r\n" +
 		"例如:\r\n" +
