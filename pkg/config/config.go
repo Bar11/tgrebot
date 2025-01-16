@@ -33,6 +33,7 @@ func LoadConfigResource[T any](configFile string, msgBus EventBus.Bus) (*Config[
 	var localConfig T
 	c.localConfig = &sync.Pool{
 		New: func() interface{} {
+			`    `
 			return localConfig
 		},
 	}
