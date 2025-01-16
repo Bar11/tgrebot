@@ -12,55 +12,56 @@ import (
 
 const (
 	helpText = "管理员命令:\r\n" +
-		"/add:\r\n" + addText +
-		"/del:\r\n" + delText +
-		"/list:\r\n" +
-		"/admin:\r\n" + "开发中。。。\n\n" +
+		"/add\r\n" + addText +
+		"/del\r\n" + delText +
+		"/list\r\n" + listText +
+		"/admin\r\n" + "开发中。。。\r\n" +
+		"/me\r\n" + "查看本人账号信息。。。\r\n" +
 		"超级管理员命令:\r\n" +
-		"/addForAll:\r\n" + addForAllText +
-		"/delForAll:\r\n" + delForAllText +
-		"/copy:\r\n" + copyText
+		"/addForAll\r\n" + addForAllText +
+		"/delForAll\r\n" + delForAllText +
+		"/copy\r\n" + copyText
 
 	addText = "格式要求:\r\n" +
-		"`/add 关键字===回复内容`\r\n\r\n" +
-		"`/add 关键字1||关键字2===回复内容`\r\n\r\n" +
+		"`/add 关键字===回复内容`\r\n" +
+		"`/add 关键字1||关键字2===回复内容`\r\n" +
 		"例如:\r\n" +
 		"`/add 机场===https://jiji.cool`\r\n" +
-		"就会添加一条规则, 关键词是机场, 回复内容是网址"
+		"就会添加一条规则, 关键词是机场, 回复内容是网址\r\n\r\n"
 	addForAllText = "权限要求:\r\n" +
-		"超级管理员\r\n\r\n" +
+		"超级管理员\r\n" +
 		"格式要求:\r\n" +
-		"`/addForAll 关键字===回复内容`\r\n\r\n" +
-		"`/addForAll 关键字1||关键字2===回复内容`\r\n\r\n" +
+		"`/addForAll 关键字===回复内容`\r\n" +
+		"`/addForAll 关键字1||关键字2===回复内容`\r\n" +
 		"例如:\r\n" +
 		"`/addForAll 机场===https://jiji.cool`\r\n" +
-		"就会为所有群组和好友添加一条规则, 关键词是机场, 回复内容是网址"
+		"就会为所有群组和好友添加一条规则, 关键词是机场, 回复内容是网址\r\n\r\n"
 	listText = "可以查看本群`group-id`和所有自动回复规则\r\n" +
 		"例如:\r\n" +
 		"`/list `\r\n" +
-		"ID:0123456789\n\n" +
-		"回复规则。。。。。。\n\n"
+		"ID:0123456789\r\n" +
+		"回复规则。。。。。。\r\n\r\n"
 	delText = "格式要求:\r\n" +
-		"`/del 关键字`\r\n\r\n" +
+		"`/del 关键字`\r\n" +
 		"例如:\r\n" +
 		"`/del 机场`\r\n" +
-		"就会删除一条规则,机器人不再回复机场关键词"
+		"就会删除一条规则,机器人不再回复机场关键词\r\n\r\n"
 	delForAllText = "权限要求:\r\n" +
-		"超级管理员\r\n\r\n" +
+		"超级管理员\r\n" +
 		"格式要求:\r\n" +
-		"`/delForAll 关键字`\r\n\r\n" +
+		"`/delForAll 关键字`\r\n" +
 		"例如:\r\n" +
 		"`/delForAll 机场`\r\n" +
-		"就会删除所有群组和好友下的这一条规则,机器人所有群组和好友不再回复机场关键词"
+		"就会删除所有群组和好友下的这一条规则,机器人所有群组和好友不再回复机场关键词\r\n\r\n"
 	copyText = "权限要求:\r\n" +
-		"超级管理员\r\n\r\n" +
+		"超级管理员\r\n" +
 		"获取group-id的方法：\r\n" +
-		"在需要复制的群组或好友窗口下输入/list命令\r\n\r\n" +
+		"在需要复制的群组或好友窗口下输入/list命令\r\n" +
 		"格式要求:\r\n" +
-		"`/copy grup-id`\r\n\r\n" +
+		"`/copy grup-id`\r\n" +
 		"例如:\r\n" +
 		"`/copy 1234567890`\r\n" +
-		"就会复制ID为：1234567890的群组或好友下的所有规则，到当前群组"
+		"就会复制ID为：1234567890的群组或好友下的所有规则，到当前群组\r\n\r\n"
 )
 
 // addRule 添加规则
