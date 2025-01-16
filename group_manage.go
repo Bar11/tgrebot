@@ -11,6 +11,16 @@ import (
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+func checkSuperUser(log logger.Logger, user api.User) bool {
+	if conf.Config().SuperUserId == user.ID {
+		log.Info("user is super user", "uid", user.ID)
+		return true
+	} else {
+		log.Info("user is not super user", "uid", user.ID)
+		return false
+	}
+}
+
 // 检查是否是群组的管理员
 func checkAdmin(log logger.Logger, gid int64, user api.User) bool {
 
