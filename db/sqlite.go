@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"tg-keyword-reply-bot/common"
 
 	"github.com/jinzhu/gorm"
@@ -22,15 +23,36 @@ type rule struct {
 	RuleJson string
 }
 
+type messageRecord struct {
+	gorm.Model
+	MessageID     int    `json:"message_id"`
+	From          string `json:"from_username"`
+	FromId        int64  `json:"from_id"`
+	FromLang      string `json:"from_lang"`
+	Date          int    `json:"date"`
+	ChatId        int64  `json:"chat_id"`
+	CharType      string `json:"char_type"`
+	ChatTitle     string `json:"chat_title"`
+	ForwardFromId int64  `json:"forward_from_id"`
+	ForwardFrom   string `json:"forward_from_userName"`
+	ForwardDate   int    `json:"forward_date"`
+	ForwardLang   string `json:"forward_lang"`
+	Text          string `json:"text"`
+	Photo         bool   `json:"photo"`
+	Document      bool   `json:"document"`
+	Vedio         bool   `json:"vedio"`
+	Voice         bool   `json:"voice"`
+	ReplyId       int    `json:"reply_id"`
+}
+
 // Init 数据库初始化，包括新建数据库（如果还没有建立），基本数据的读写
 func Init(newToken string) (token string) {
 	dbtmp, err := gorm.Open("sqlite3", "data.db")
 	if err != nil {
-		fmt.Println(err)
 		panic("failed to connect database")
 	}
 	db = dbtmp
-	db.AutoMigrate(&setting{}, &rule{})
+	db.AutoMigrate(&setting{}, &rule{}, &messageRecord{})
 	var tokenSetting setting
 	db.Find(&tokenSetting, "Key=?", "token")
 	token = tokenSetting.Value
@@ -48,6 +70,45 @@ func Init(newToken string) (token string) {
 	}
 	readAllGroupRules()
 	return
+}
+
+func AddMessageRecord(message api.Message) {
+	var messageForwardFromId int64 = 0
+	var messageForwardDate = 0
+	var messageForwardLang = ""
+	var messageForwardFrom = ""
+	var replyToMessage = 0
+	fmt.Println(message.ForwardDate)
+	if message.ForwardFrom != nil {
+		messageForwardFromId = message.ForwardFrom.ID
+		messageForwardDate = message.ForwardDate
+		messageForwardLang = message.ForwardFrom.LanguageCode
+		messageForwardFrom = message.ForwardFrom.UserName
+	}
+	if message.ReplyToMessage != nil {
+		replyToMessage = message.ReplyToMessage.MessageID
+	}
+
+	db.Create(&messageRecord{
+		MessageID:     message.MessageID,
+		From:          message.From.FirstName + message.From.LastName,
+		FromId:        message.From.ID,
+		Date:          message.Date,
+		ChatId:        message.Chat.ID,
+		ChatTitle:     message.Chat.Title,
+		Text:          message.Text,
+		FromLang:      message.From.LanguageCode,
+		CharType:      message.Chat.Type,
+		ForwardFromId: messageForwardFromId,
+		ForwardFrom:   messageForwardFrom,
+		ForwardDate:   messageForwardDate,
+		ForwardLang:   messageForwardLang,
+		Photo:         message.Photo != nil,
+		Document:      message.Document != nil,
+		Vedio:         message.Video != nil,
+		Voice:         message.Voice != nil,
+		ReplyId:       replyToMessage,
+	})
 }
 
 // AddNewGroup 数据库中添加一条记录来记录新群组的规则

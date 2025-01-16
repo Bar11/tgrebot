@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/chain5j/logger"
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"tg-keyword-reply-bot/db"
 	"time"
 )
 
@@ -13,6 +14,7 @@ func sendMessage(log logger.Logger, msg api.MessageConfig) api.Message {
 		return api.Message{}
 	}
 	mmsg, err := bot.Send(msg)
+	db.AddMessageRecord(mmsg)
 	if err != nil {
 		log.Error("bot send msg err", "err", err)
 	}
@@ -24,6 +26,7 @@ func sendMessage(log logger.Logger, msg api.MessageConfig) api.Message {
 func sendPhoto(log logger.Logger, chatId int64, filePath string) api.Message {
 	msg := api.NewPhoto(chatId, api.FileURL(filePath))
 	mmsg, err := bot.Send(msg)
+	db.AddMessageRecord(mmsg)
 	if err != nil {
 		log.Error("bot send photo err", "err", err)
 	}
@@ -35,6 +38,7 @@ func sendPhoto(log logger.Logger, chatId int64, filePath string) api.Message {
 func sendGif(log logger.Logger, chatId int64, filePath string) api.Message {
 	file := api.NewDocument(chatId, api.FileURL(filePath))
 	mmsg, err := bot.Send(file)
+	db.AddMessageRecord(mmsg)
 	if err != nil {
 		log.Error("bot send gif err", "err", err)
 	}
@@ -46,6 +50,7 @@ func sendGif(log logger.Logger, chatId int64, filePath string) api.Message {
 func sendVideo(log logger.Logger, chatId int64, filePath string) api.Message {
 	file := api.NewVideo(chatId, api.FileURL(filePath))
 	mmsg, err := bot.Send(file)
+	db.AddMessageRecord(mmsg)
 	if err != nil {
 		log.Error("bot send video err", "err", err)
 	}
@@ -57,6 +62,7 @@ func sendVideo(log logger.Logger, chatId int64, filePath string) api.Message {
 func sendFile(log logger.Logger, chatId int64, filePath string) api.Message {
 	file := api.NewDocument(chatId, api.FileURL(filePath))
 	mmsg, err := bot.Send(file)
+	db.AddMessageRecord(mmsg)
 	if err != nil {
 		log.Error("bot send file err", "err", err)
 	}
