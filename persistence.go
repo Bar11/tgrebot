@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -78,6 +79,7 @@ func getRuleList(gid int64) []string {
 // 查询是否包含相应的自动回复规则
 func findKey(gid int64, input string) string {
 	kvs := common.AllGroupRules[gid]
+	fmt.Println("AllGroupRules:", kvs)
 	for keyword, reply := range kvs {
 		if strings.HasPrefix(keyword, "re:") {
 			keyword = keyword[3:]
