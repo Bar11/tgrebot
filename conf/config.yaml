@@ -15,7 +15,7 @@ log:
 tgbot:
   token: "8169129152:AAGHfgLqhwpo6Oaq7o1fWokHAhnjXK3AnVk"
   super_user_id: 7445783553 # 超级管理员，默认为0
-  debug: true
+  debug: false
   chan_size: 10000
 
   #  token: "8148995474:AAHNXIwKNwya_beAmYTmaTkaP9vnTZIJw4k"

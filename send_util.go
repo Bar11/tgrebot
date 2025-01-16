@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/chain5j/logger"
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"time"
@@ -13,8 +12,6 @@ func sendMessage(log logger.Logger, msg api.MessageConfig) api.Message {
 		log.Debug("message is nil")
 		return api.Message{}
 	}
-	fmt.Println(msg)
-	fmt.Println(bot)
 	mmsg, err := bot.Send(msg)
 	if err != nil {
 		log.Error("bot send msg err", "err", err)
