@@ -41,7 +41,7 @@ func LoadConfigResource[T any](configFile string, msgBus EventBus.Bus) (*Config[
 		c.log.Info("Config module watch file changed", "eventName", e.Name)
 		oldConfig := c.Config()
 		var localConfig1 T
-		if err := cli.LoadConfig(configFile, "", &localConfig1); err == nil {
+		if err := cli.LoadConfig(configFile, "tgbot", &localConfig1); err == nil {
 			c.localConfig.Put(localConfig1)
 			c.log.Info("Local config update success")
 			c.compareConfig(oldConfig, localConfig1)

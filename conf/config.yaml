@@ -14,7 +14,7 @@ log:
     file_name: "info.log"  # 日志文件名
 tgbot:
   token: "8169129152:AAGHfgLqhwpo6Oaq7o1fWokHAhnjXK3AnVk"
-  super_user_id: 7875993957 # 超级管理员，默认为0
+  super_user_id: 7445783553 # 超级管理员，默认为0
   debug: true
   chan_size: 10000
 
