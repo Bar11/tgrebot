@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"tg-keyword-reply-bot/common"
 
@@ -78,7 +77,6 @@ func AddMessageRecord(message api.Message) {
 	var messageForwardLang = ""
 	var messageForwardFrom = ""
 	var replyToMessage = 0
-	fmt.Println(message.ForwardDate)
 	if message.ForwardFrom != nil {
 		messageForwardFromId = message.ForwardFrom.ID
 		messageForwardDate = message.ForwardDate
