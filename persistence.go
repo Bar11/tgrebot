@@ -15,8 +15,8 @@ const (
 		"/add\r\n" + addText +
 		"/del\r\n" + delText +
 		"/list\r\n" + listText +
-		"/admin\r\n" + "开发中。。。\r\n" +
-		"/me\r\n" + "查看本人账号信息。。。\r\n" +
+		"/admin\r\n" + "开发中。。。\r\n\r\n" +
+		"/me\r\n" + "查看本人账号信息。。。\r\n\r\n" +
 		"超级管理员命令:\r\n" +
 		"/addForAll\r\n" + addForAllText +
 		"/delForAll\r\n" + delForAllText +
