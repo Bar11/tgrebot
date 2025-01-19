@@ -291,42 +291,60 @@ func processReplyCommand(log logger.Logger, update *api.Update) {
 	var msg api.MessageConfig
 	upmsg := update.Message
 	gid := upmsg.Chat.ID
-	// 回复类型的管理命令
-	if upmsg.ReplyToMessage != nil {
-		replyToUserId := upmsg.ReplyToMessage.From.ID
-		switch upmsg.Text {
-		case "ban":
-			if checkAdmin(log, gid, *upmsg.From) {
-				banMember(log, gid, replyToUserId, -1)
-				mem, _ := bot.GetChatMember(api.GetChatMemberConfig{ChatConfigWithUser: api.ChatConfigWithUser{ChatID: gid, SuperGroupUsername: "", UserID: replyToUserId}})
-				if !mem.CanSendMessages {
+	usr := *upmsg.From
+	if checkAdmin(log, gid, usr) {
+		// 回复类型的管理命令
+		if upmsg.ReplyToMessage != nil {
+			replyToUserId := upmsg.ReplyToMessage.From.ID
+			switch upmsg.Text {
+			case "ban":
+				if checkAdmin(log, gid, *upmsg.From) {
+					banMember(log, gid, replyToUserId, -1)
+					mem, _ := bot.GetChatMember(api.GetChatMemberConfig{ChatConfigWithUser: api.ChatConfigWithUser{ChatID: gid, SuperGroupUsername: "", UserID: replyToUserId}})
+					if !mem.CanSendMessages {
+						msg = api.NewMessage(gid, "")
+						msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ") 禁言了 " +
+							"[" + upmsg.ReplyToMessage.From.String() + "](tg://user?id=" + strconv.FormatInt(replyToUserId, 10) + ") "
+						msg.ParseMode = "Markdown"
+						sendMessage(log, msg)
+					}
+				}
+			case "unban":
+				if checkAdmin(log, gid, *upmsg.From) {
+					unbanMember(log, gid, replyToUserId)
+					// mem,_ := bot.GetChatMember(api.ChatConfigWithUser{gid, "", replyToUserId})
+					//
 					msg = api.NewMessage(gid, "")
-					msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ") 禁言了 " +
+					msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ") 解禁了 " +
 						"[" + upmsg.ReplyToMessage.From.String() + "](tg://user?id=" + strconv.FormatInt(replyToUserId, 10) + ") "
 					msg.ParseMode = "Markdown"
 					sendMessage(log, msg)
 				}
+			case "kick":
+				if checkAdmin(log, gid, *upmsg.From) {
+					kickMember(log, gid, replyToUserId)
+					msg = api.NewMessage(gid, "")
+					msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ") 关小黑屋了 " +
+						"[" + upmsg.ReplyToMessage.From.String() + "](tg://user?id=" + strconv.FormatInt(replyToUserId, 10) + ") "
+					msg.ParseMode = "Markdown"
+					sendMessage(log, msg)
+				}
+			case "unkick":
+				if checkAdmin(log, gid, *upmsg.From) {
+					unkickMember(log, gid, replyToUserId)
+					msg = api.NewMessage(gid, "")
+					msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ") 放出来了 " +
+						"[" + upmsg.ReplyToMessage.From.String() + "](tg://user?id=" + strconv.FormatInt(replyToUserId, 10) + ") "
+					msg.ParseMode = "Markdown"
+					sendMessage(log, msg)
+				}
+			default:
 			}
-		case "unban":
-			if checkAdmin(log, gid, *upmsg.From) {
-				unbanMember(log, gid, replyToUserId)
-				// mem,_ := bot.GetChatMember(api.ChatConfigWithUser{gid, "", replyToUserId})
-				//
-				msg = api.NewMessage(gid, "")
-				msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ") 解禁了 " +
-					"[" + upmsg.ReplyToMessage.From.String() + "](tg://user?id=" + strconv.FormatInt(replyToUserId, 10) + ") "
-				msg.ParseMode = "Markdown"
-				sendMessage(log, msg)
-			}
-		//case "kick":
-		//	if checkAdmin(log, gid, *upmsg.From) {
-		//		kickMember(log, gid, replyToUserId)
-		//	}
-		//case "unkick":
-		//	if checkAdmin(log, gid, *upmsg.From) {
-		//		unkickMember(log, gid, replyToUserId)
-		//	}
-		default:
 		}
+	} else {
+		msg = api.NewMessage(gid, "")
+		msg.Text = "you are not admin"
+		sendMessage(log, msg)
 	}
+
 }
