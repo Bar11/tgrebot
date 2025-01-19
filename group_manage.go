@@ -103,16 +103,47 @@ func unbanMember(log logger.Logger, gid int64, uid int64) {
 	_, _ = bot.Send(restricconfig)
 }
 
-//// 踢出群员
-//func kickMember(log logger.Logger, gid int64, uid int64) {
-//	cmconf := api.ChatMemberConfig{ChatID: gid, UserID: uid}
-//	_, _ = bot.Send(api.KickChatMemberConfig{ChatMemberConfig: cmconf, UntilDate: 99999999999})
-//}
+// 踢出群员
+func kickMember(log logger.Logger, gid int64, uid int64) {
+	chatuserconfig := api.ChatMemberConfig{ChatID: gid, UserID: uid}
+	chatPermissions := &api.ChatPermissions{
+		CanSendMessages:       false,
+		CanSendMediaMessages:  false,
+		CanSendPolls:          false,
+		CanSendOtherMessages:  false,
+		CanAddWebPagePreviews: false,
+		CanChangeInfo:         false,
+		CanInviteUsers:        false,
+		CanPinMessages:        false,
+	}
+	restricconfig := api.RestrictChatMemberConfig{
+		ChatMemberConfig: chatuserconfig,
+		UntilDate:        9999999999999,
+		Permissions:      chatPermissions,
+	}
+	_, _ = bot.Send(restricconfig)
+}
 
-//// 解除禁止
-//func unkickMember(log logger.Logger, gid int64, uid int64) {
-//	_, _ = bot.Send(api.ChatMemberConfig{ChatID: gid, UserID: uid})
-//}
+// 解除禁止
+func unkickMember(log logger.Logger, gid int64, uid int64) {
+	chatuserconfig := api.ChatMemberConfig{ChatID: gid, UserID: uid}
+	chatPermissions := &api.ChatPermissions{
+		CanSendMessages:       true,
+		CanSendMediaMessages:  true,
+		CanSendPolls:          true,
+		CanSendOtherMessages:  true,
+		CanAddWebPagePreviews: true,
+		CanChangeInfo:         true,
+		CanInviteUsers:        true,
+		CanPinMessages:        true,
+	}
+	restricconfig := api.RestrictChatMemberConfig{
+		ChatMemberConfig: chatuserconfig,
+		UntilDate:        time.Now().Unix(),
+		Permissions:      chatPermissions,
+	}
+	_, _ = bot.Send(restricconfig)
+}
 
 // 返回群组的所有管理员, 用来进行一次性@
 func getAdmins(log logger.Logger, gid int64) string {
