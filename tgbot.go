@@ -114,7 +114,7 @@ func processReply(log logger.Logger, update *api.Update) {
 			log.Error("parse int error", "err", err)
 		}
 		msg = api.NewMessage(gid, "")
-		if sec != 9999999999999 {
+		if -1 < sec && sec < 9999999999999 {
 			msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ") Speech involving sensitive words, banned for " + strconv.FormatInt(sec, 10) + " second.If you have any questions, please contact the administrator."
 		} else {
 			msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ") Speech involving sensitive words, permanently banned.If you have any questions, please contact the administrator"
@@ -171,7 +171,6 @@ func processCommand(log logger.Logger, update *api.Update) {
 			}
 			sendMessage(log, msg)
 		}
-
 	case "add":
 		if checkAdmin(log, gid, *upmsg.From) {
 			order := upmsg.CommandArguments()
@@ -320,47 +319,47 @@ func processReplyCommand(log logger.Logger, update *api.Update) {
 	if upmsg.ReplyToMessage != nil {
 		replyToUserId := upmsg.ReplyToMessage.From.ID
 		switch upmsg.Text {
-		case "ban":
+		case "kick":
 			if checkAdmin(log, gid, *upmsg.From) {
 				banMember(log, gid, replyToUserId, -1)
 				mem, _ := bot.GetChatMember(api.GetChatMemberConfig{ChatConfigWithUser: api.ChatConfigWithUser{ChatID: gid, SuperGroupUsername: "", UserID: replyToUserId}})
 				if !mem.CanSendMessages {
 					msg = api.NewMessage(gid, "")
-					msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ") 禁言了 " +
-						"[" + upmsg.ReplyToMessage.From.String() + "](tg://user?id=" + strconv.FormatInt(replyToUserId, 10) + ") "
+					msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ") 将 " +
+						"[" + upmsg.ReplyToMessage.From.String() + "](tg://user?id=" + strconv.FormatInt(replyToUserId, 10) + ") " + "禁言了"
 					msg.ParseMode = "Markdown"
 					sendMessage(log, msg)
 				}
 			}
-		case "unban":
+		case "unkick":
 			if checkAdmin(log, gid, *upmsg.From) {
 				unbanMember(log, gid, replyToUserId)
 				// mem,_ := bot.GetChatMember(api.ChatConfigWithUser{gid, "", replyToUserId})
 				//
 				msg = api.NewMessage(gid, "")
-				msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ") 解禁了 " +
-					"[" + upmsg.ReplyToMessage.From.String() + "](tg://user?id=" + strconv.FormatInt(replyToUserId, 10) + ") "
+				msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ") 将 " +
+					"[" + upmsg.ReplyToMessage.From.String() + "](tg://user?id=" + strconv.FormatInt(replyToUserId, 10) + ") " + "解除禁言了"
 				msg.ParseMode = "Markdown"
 				sendMessage(log, msg)
 			}
-		case "kick":
-			if checkAdmin(log, gid, *upmsg.From) {
-				kickMember(log, gid, replyToUserId)
-				msg = api.NewMessage(gid, "")
-				msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ") 关小黑屋了 " +
-					"[" + upmsg.ReplyToMessage.From.String() + "](tg://user?id=" + strconv.FormatInt(replyToUserId, 10) + ") "
-				msg.ParseMode = "Markdown"
-				sendMessage(log, msg)
-			}
-		case "unkick":
-			if checkAdmin(log, gid, *upmsg.From) {
-				unkickMember(log, gid, replyToUserId)
-				msg = api.NewMessage(gid, "")
-				msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ") 放出来了 " +
-					"[" + upmsg.ReplyToMessage.From.String() + "](tg://user?id=" + strconv.FormatInt(replyToUserId, 10) + ") "
-				msg.ParseMode = "Markdown"
-				sendMessage(log, msg)
-			}
+		//case "kick":
+		//	if checkAdmin(log, gid, *upmsg.From) {
+		//		kickMember(log, gid, replyToUserId)
+		//		msg = api.NewMessage(gid, "")
+		//		msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ") 关小黑屋了 " +
+		//			"[" + upmsg.ReplyToMessage.From.String() + "](tg://user?id=" + strconv.FormatInt(replyToUserId, 10) + ") "
+		//		msg.ParseMode = "Markdown"
+		//		sendMessage(log, msg)
+		//	}
+		//case "unkick":
+		//	if checkAdmin(log, gid, *upmsg.From) {
+		//		unkickMember(log, gid, replyToUserId)
+		//		msg = api.NewMessage(gid, "")
+		//		msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ") 放出来了 " +
+		//			"[" + upmsg.ReplyToMessage.From.String() + "](tg://user?id=" + strconv.FormatInt(replyToUserId, 10) + ") "
+		//		msg.ParseMode = "Markdown"
+		//		sendMessage(log, msg)
+		//	}
 		default:
 		}
 	}

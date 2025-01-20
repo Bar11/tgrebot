@@ -98,10 +98,10 @@ func addBanRule(gid int64, rule string) {
 		if strings.Contains(rule, "||") {
 			ks := strings.Split(rule, "||")
 			for _, key := range ks {
-				_addOneRule(key, "ban:9999999999999", rules)
+				_addOneRule(key, "ban:-1", rules)
 			}
 		} else {
-			_addOneRule(rule, "ban:9999999999999", rules)
+			_addOneRule(rule, "ban:-1", rules)
 		}
 	} else {
 		keys, value := r[0], r[1]
