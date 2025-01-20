@@ -92,6 +92,7 @@ func DownloadPhoto(message api.Message, bot api.BotAPI) {
 	}(out)
 }
 
+// 记录聊天信息
 func AddMessageRecord(message api.Message, url string, msgType string) {
 	PhotoUrl := ""
 	DocumentUrl := ""

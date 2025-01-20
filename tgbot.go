@@ -149,13 +149,11 @@ func processCommand(log logger.Logger, update *api.Update) {
 	gid := upmsg.Chat.ID
 	uid := upmsg.From.ID
 	msg := api.NewMessage(update.Message.Chat.ID, "")
-	//_ = api.NewDeleteMessage(update.Message.Chat.ID, upmsg.MessageID)
-	//log.Info("bot delete the msg", "gid", gid, "uid", uid, "mid", upmsg.MessageID)
 	// 上传发送的本地文件（包含图片、语音、视频、文档）
 	if upmsg.ReplyToMessage != nil {
 		switch upmsg.Command() {
-		case "add":
-			if checkAdmin(log, gid, *upmsg.From) || checkSuperUser(log, *upmsg.From) {
+		case "local":
+			if checkAdmin(log, gid, *upmsg.From) {
 				order := upmsg.CommandArguments()
 				if order != "" {
 					url, messageType := GetUrlFromServer(*upmsg.ReplyToMessage, bot)
@@ -164,23 +162,27 @@ func processCommand(log logger.Logger, update *api.Update) {
 						case "Photo":
 							Photo := upmsg.ReplyToMessage.Photo[len(upmsg.ReplyToMessage.Photo)-1]
 							order += "===photo:" + Photo.FileID
-
 						case "Video":
 							order += "===video:" + upmsg.ReplyToMessage.Video.FileID
-
 						case "Document":
 							order += "===document:" + upmsg.ReplyToMessage.Document.FileID
-
 						case "Voice":
 							order += "===voice:" + upmsg.ReplyToMessage.Voice.FileID
 						default:
 							return
 						}
 					}
-					addRule(gid, order)
+					if checkSuperUser(log, *upmsg.From) {
+						for _, gid_ := range common.AllGroupId {
+							addRule(gid_, order)
+						}
+					} else {
+						addRule(gid, order)
+					}
+
 					msg.Text = "规则添加成功: " + order
 				} else {
-					msg.Text = addText
+					msg.Text = localText
 					msg.ParseMode = "Markdown"
 					msg.DisableWebPagePreview = true
 				}
@@ -227,6 +229,8 @@ func processCommand(log logger.Logger, update *api.Update) {
 		//	if checkAdmin(log, gid, *upmsg.From) {
 		//		SendKeyboardButtonData(log, gid, *upmsg)
 		//	}
+		case "allChat":
+			//bot.Get
 		case "add":
 			if checkAdmin(log, gid, *upmsg.From) {
 				order := upmsg.CommandArguments()
