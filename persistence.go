@@ -118,6 +118,7 @@ func addBanRule(gid int64, rule string) {
 			_addOneRule(keys, "ban:"+value, rules)
 		}
 	}
+	db.UpdateGroupRule(gid, rules.String())
 
 }
 
