@@ -176,9 +176,11 @@ func findKey(gid int64, input string) string {
 	return ""
 }
 
-// 生成图片在"https://api.telegram.org/file/bot"服务器的 url地址
-func GetUrlFromServer(message api.Message, bot *api.BotAPI) string {
+// 生成图片、视频、语音、文件等，在"https://api.telegram.org/file/bot"服务器的 url地址
+func GetUrlFromServer(message api.Message, bot *api.BotAPI) (string, string) {
+	Type := ""
 	if message.Photo != nil {
+		Type = "Photo"
 		photoURL := ""
 		Photo := message.Photo[len(message.Photo)-1]
 		fileID := Photo.FileID
@@ -188,8 +190,9 @@ func GetUrlFromServer(message api.Message, bot *api.BotAPI) string {
 		} else {
 			photoURL = "https://api.telegram.org/file/bot" + conf.Config().Token + "/" + file.FilePath
 		}
-		return photoURL
+		return photoURL, Type
 	} else if message.Video != nil {
+		Type = "Video"
 		videoURL := ""
 		Video := message.Video
 		fileID := Video.FileID
@@ -199,12 +202,32 @@ func GetUrlFromServer(message api.Message, bot *api.BotAPI) string {
 		} else {
 			videoURL = "https://api.telegram.org/file/bot" + conf.Config().Token + "/" + file.FilePath
 		}
-		return videoURL
+		return videoURL, Type
 	} else if message.Document != nil {
-		return ""
+		Type = "Document"
+		DocumentURL := ""
+		Document := message.Document
+		fileID := Document.FileID
+		file, err := bot.GetFile(api.FileConfig{fileID})
+		if err != nil {
+			log.Info("download  photo failed", "fileID", fileID)
+		} else {
+			DocumentURL = "https://api.telegram.org/file/bot" + conf.Config().Token + "/" + file.FilePath
+		}
+		return DocumentURL, Type
 	} else if message.Voice != nil {
-		return ""
+		Type = "Voice"
+		VoiceURL := ""
+		Voice := message.Voice
+		fileID := Voice.FileID
+		file, err := bot.GetFile(api.FileConfig{fileID})
+		if err != nil {
+			log.Info("download  photo failed", "fileID", fileID)
+		} else {
+			VoiceURL = "https://api.telegram.org/file/bot" + conf.Config().Token + "/" + file.FilePath
+		}
+		return VoiceURL, Type
 	} else {
-		return ""
+		return "", Type
 	}
 }

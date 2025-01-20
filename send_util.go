@@ -18,7 +18,9 @@ func sendMessage(log logger.Logger, msg api.MessageConfig) api.Message {
 		log.Error("bot send msg err", "err", err)
 		return mmsg
 	}
-	db.AddMessageRecord(mmsg)
+
+	url, messageType := GetUrlFromServer(mmsg, bot)
+	db.AddMessageRecord(mmsg, url, messageType)
 	// go deleteMessage(log, msg.ChatID, mmsg.MessageID)
 	return mmsg
 }
@@ -82,7 +84,8 @@ func sendPhoto(log logger.Logger, chatId int64, filePath string) api.Message {
 	if err != nil {
 		log.Error("bot send photo err", "err", err)
 	}
-	db.AddMessageRecord(mmsg)
+	url, messageType := GetUrlFromServer(mmsg, bot)
+	db.AddMessageRecord(mmsg, url, messageType)
 	// go deleteMessage(log, chatId, mmsg.MessageID)
 	return mmsg
 }
@@ -95,7 +98,8 @@ func sendGif(log logger.Logger, chatId int64, filePath string) api.Message {
 		log.Error("bot send gif err", "err", err)
 		return mmsg
 	}
-	db.AddMessageRecord(mmsg)
+	url, messageType := GetUrlFromServer(mmsg, bot)
+	db.AddMessageRecord(mmsg, url, messageType)
 	// go deleteMessage(log, chatId, mmsg.MessageID)
 	return mmsg
 }
@@ -108,7 +112,8 @@ func sendVideo(log logger.Logger, chatId int64, filePath string) api.Message {
 		log.Error("bot send video err", "err", err)
 		return mmsg
 	}
-	db.AddMessageRecord(mmsg)
+	url, messageType := GetUrlFromServer(mmsg, bot)
+	db.AddMessageRecord(mmsg, url, messageType)
 	// go deleteMessage(log, chatId, mmsg.MessageID)
 	return mmsg
 }
@@ -121,7 +126,8 @@ func sendFile(log logger.Logger, chatId int64, filePath string) api.Message {
 		log.Error("bot send file err", "err", err)
 		return mmsg
 	}
-	db.AddMessageRecord(mmsg)
+	url, messageType := GetUrlFromServer(mmsg, bot)
+	db.AddMessageRecord(mmsg, url, messageType)
 	// go deleteMessage(log, chatId, mmsg.MessageID)
 	return mmsg
 }

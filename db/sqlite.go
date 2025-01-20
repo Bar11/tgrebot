@@ -3,12 +3,11 @@ package db
 import (
 	log "github.com/chain5j/log15"
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/sqlite" // 初始化gorm使用sqlite
 	"os"
 	"path/filepath"
 	"tg-keyword-reply-bot/common"
-
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite" // 初始化gorm使用sqlite
 )
 
 var db *gorm.DB
@@ -40,10 +39,10 @@ type messageRecord struct {
 	ForwardDate   int    `json:"forward_date"`
 	ForwardLang   string `json:"forward_lang"`
 	Text          string `json:"text"`
-	Photo         bool   `json:"photo"`
-	Document      bool   `json:"document"`
-	Vedio         bool   `json:"vedio"`
-	Voice         bool   `json:"voice"`
+	Photo         string `json:"photo_path"`
+	Document      string `json:"document_path"`
+	Video         string `json:"video_path"`
+	Voice         string `json:"voice_path"`
 	ReplyId       int    `json:"reply_id"`
 }
 
@@ -93,7 +92,21 @@ func DownloadPhoto(message api.Message, bot api.BotAPI) {
 	}(out)
 }
 
-func AddMessageRecord(message api.Message) {
+func AddMessageRecord(message api.Message, url string, msgType string) {
+	PhotoUrl := ""
+	DocumentUrl := ""
+	VoiceUrl := ""
+	VideoUrl := ""
+	switch msgType {
+	case "Photo":
+		PhotoUrl = url
+	case "Document":
+		DocumentUrl = url
+	case "Voice":
+		VoiceUrl = url
+	case "Video":
+		VideoUrl = url
+	}
 	var messageForwardFromId int64 = 0
 	var messageForwardDate = 0
 	var messageForwardLang = ""
@@ -123,10 +136,10 @@ func AddMessageRecord(message api.Message) {
 		ForwardFrom:   messageForwardFrom,
 		ForwardDate:   messageForwardDate,
 		ForwardLang:   messageForwardLang,
-		Photo:         message.Photo != nil,
-		Document:      message.Document != nil,
-		Vedio:         message.Video != nil,
-		Voice:         message.Voice != nil,
+		Photo:         PhotoUrl,
+		Document:      DocumentUrl,
+		Video:         VoiceUrl,
+		Voice:         VideoUrl,
 		ReplyId:       replyToMessage,
 	})
 }

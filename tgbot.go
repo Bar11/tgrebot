@@ -57,9 +57,10 @@ func processUpdate(log logger.Logger, update *api.Update) {
 	fmt.Println(string(jsonString))
 	fmt.Println(upmsg.Photo)
 	fmt.Println(conf.Config().SaveFile)
-	//GetUrlFromServer(*upmsg, bot)
-
-	db.AddMessageRecord(*upmsg)
+	url, messageType := GetUrlFromServer(*upmsg, bot)
+	fmt.Println(url)
+	fmt.Println(messageType)
+	db.AddMessageRecord(*upmsg, url, messageType)
 	log.Debug("update msg", "msg", upmsg.Text)
 	gid := upmsg.Chat.ID
 	uid := upmsg.From.ID
