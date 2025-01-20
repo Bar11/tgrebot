@@ -109,12 +109,21 @@ func processReply(log logger.Logger, update *api.Update) {
 	if replyText == "delete" {
 		_ = api.NewDeleteMessage(gid, upmsg.MessageID)
 	} else if strings.HasPrefix(replyText, "ban:") {
-		deleteMessage(log, gid, upmsg.MessageID)
-		sec, _ := strconv.ParseInt(replyText[6:], 10, 64)
+		sec, err := strconv.ParseInt(replyText[4:], 10, 64)
+		if err != nil {
+			log.Error("parse int error", "err", err)
+		}
+		msg = api.NewMessage(gid, "")
+		if sec != 9999999999999 {
+			msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ") Speech involving sensitive words, banned for " + strconv.FormatInt(sec, 10) + " second.If you have any questions, please contact the administrator."
+		} else {
+			msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ") Speech involving sensitive words, permanently banned.If you have any questions, please contact the administrator"
+
+		}
+		msg.ParseMode = "Markdown"
+		sendMessage(log, msg)
 		banMember(log, gid, uid, sec)
-		//} else if strings.HasPrefix(replyText, "kick") {
-		//	_ = api.NewDeleteMessage(gid, upmsg.MessageID)
-		//	kickMember(log, gid, uid)
+		deleteMessage(log, gid, upmsg.MessageID)
 	} else if strings.HasPrefix(replyText, "photo:") {
 		sendPhoto(log, gid, replyText[6:])
 	} else if strings.HasPrefix(replyText, "gif:") {
@@ -152,8 +161,9 @@ func processCommand(log logger.Logger, update *api.Update) {
 		if checkAdmin(log, gid, *upmsg.From) {
 			order := upmsg.CommandArguments()
 			if order != "" {
-				addBanRule(gid, order)
-				msg.Text = "规则添加成功: " + order
+				for _, gid := range common.AllGroupId {
+					addBanRule(gid, order)
+				}
 			} else {
 				msg.Text = addBanText
 				msg.ParseMode = "Markdown"
