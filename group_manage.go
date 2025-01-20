@@ -68,9 +68,9 @@ func punish(log logger.Logger, gid int64, user api.User) {
 
 // 禁言群员
 func banMember(log logger.Logger, gid int64, uid int64, sec int64) {
-	if sec <= 0 {
-		sec = 9999999999999
-	}
+	//if sec <= 0 {
+	//	sec = 9999999999999
+	//}
 	chatuserconfig := api.ChatMemberConfig{ChatID: gid, UserID: uid}
 	chatPermissions := &api.ChatPermissions{
 		CanSendMessages:       false,
