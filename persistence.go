@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	log "github.com/chain5j/log15"
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"regexp"
@@ -37,6 +38,11 @@ const (
 		"例如:\r\n" +
 		"`/add 机场===https://jiji.cool`\r\n" +
 		"就会添加一条规则, 关键词是机场, 回复内容是网址\r\n\r\n"
+	allChatText = "权限要求:\r\n" +
+		"超级管理员,并且要求私聊机器人\r\n" +
+		"格式要求:\r\n" +
+		"`/allChat`\r\n" +
+		"返回当前所有bot存在的chatId,私聊是对方姓名，group是群title\r\n\r\n"
 	localText = "格式要求:\r\n" +
 		"`/local 关键字1||关键字2`\r\n" +
 		"例如:" +
@@ -145,6 +151,7 @@ func delRule(gid int64, key string) {
 // 获取一个群组所有规则的列表
 func getRuleList(gid int64) []string {
 	kvs := common.AllGroupRules[gid]
+	fmt.Println(kvs)
 	str := ""
 	var strs []string
 	num := 1

@@ -128,9 +128,7 @@ func AddMessageRecord(message api.Message, url string, msgType string) {
 
 // AddNewGroup 数据库中添加一条记录来记录新群组的规则
 func AddNewGroup(groupId int64, title string, types string) {
-	if types == "private" {
-		title = ""
-	}
+
 	db.Create(&rule{
 		GroupId:   groupId,
 		ChatTitle: title,

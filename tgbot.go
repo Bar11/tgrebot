@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/panjf2000/ants/v2"
 	"math/rand"
 	"strconv"
@@ -53,9 +51,8 @@ func start(log logger.Logger, botToken string) {
 // processUpdate 对于每一个update的单独处理
 func processUpdate(log logger.Logger, update *api.Update) {
 	upmsg := update.Message
-	jsonString, _ := json.Marshal(upmsg)
-	fmt.Println(string(jsonString))
-
+	//jsonString, _ := json.Marshal(upmsg)
+	//fmt.Println(string(jsonString))
 	url, messageType := GetUrlFromServer(*upmsg, bot)
 	db.AddMessageRecord(*upmsg, url, messageType)
 	log.Debug("update msg", "msg", upmsg.Text)
@@ -66,7 +63,14 @@ func processUpdate(log logger.Logger, update *api.Update) {
 	in := checkInGroup(gid)
 	if !in {
 		// 不在就需要加入, 内存中加一份, 数据库中添加一条空规则记录
-		db.AddNewGroup(gid, upmsg.Chat.Title, upmsg.Chat.Type)
+		var title string
+		TypeChat := upmsg.Chat.Type
+		if TypeChat == "private" {
+			title = upmsg.From.FirstName + " " + upmsg.From.LastName
+		} else {
+			title = upmsg.Chat.Title
+		}
+		db.AddNewGroup(gid, title, TypeChat)
 		common.AddNewGroup(gid)
 		log.Info("add new group", "gid", gid)
 	}
@@ -229,19 +233,25 @@ func processCommand(log logger.Logger, update *api.Update) {
 			return
 		}
 		sendMessage(log, msg)
-	//case "test":
-	//	if checkAdmin(log, gid, *upmsg.From) {
-	//		SendKeyboardButtonData(log, gid, *upmsg)
-	//	}
+
 	case "allChat":
-		rules, err := db.GetAllGroup(log)
-		if err != nil {
-			sendMessage(log, msg)
-		} else {
-			for _, r := range rules {
-				fmt.Printf("ID: %d, GroupId: %d, RuleJson: %s\n", r.ID, r.GroupId, r.RuleJson)
+		if checkSuperUser(log, *upmsg.From) && upmsg.Chat.Type == "private" {
+			rules, err := db.GetAllGroup(log)
+			if err != nil {
+				sendMessage(log, msg)
+			} else {
+				for _, r := range rules {
+					msg.Text += r.ChatTitle + ", " + strconv.FormatInt(r.GroupId, 10) + ", " + r.ChatType + "\r\n"
+				}
+				msg.ParseMode = "Markdown"
+				msg.DisableWebPagePreview = true
 			}
+		} else {
+			msg.Text = allChatText
+			msg.ParseMode = "Markdown"
+			msg.DisableWebPagePreview = true
 		}
+		sendMessage(log, msg)
 	case "add":
 		if checkAdmin(log, gid, *upmsg.From) {
 			order := upmsg.CommandArguments()
@@ -286,9 +296,9 @@ func processCommand(log logger.Logger, update *api.Update) {
 					msg.DisableWebPagePreview = true
 				}
 				rules := common.AllGroupRules[fromGid]
-				fmt.Println(rules)
 				db.UpdateGroupRule(gid, rules.String())
 				common.AddNewGroup(gid)
+				common.AllGroupRules[gid] = rules
 				msg.Text = "复制群组所有规则到当前群组" + "from:" + order + "  to:" + strconv.FormatInt(gid, 10)
 			} else {
 				msg.Text = copyText
@@ -335,17 +345,52 @@ func processCommand(log logger.Logger, update *api.Update) {
 		}
 	case "list":
 		if checkAdmin(log, gid, *upmsg.From) {
-			rulelists := getRuleList(gid)
-			msg.Text = "ID: " + strconv.FormatInt(gid, 10)
-			msg.ParseMode = "Markdown"
-			msg.DisableWebPagePreview = true
-			sendMessage(log, msg)
-			for _, rlist := range rulelists {
-				msg.Text = rlist
+			order := upmsg.CommandArguments()
+			if order != "" {
+				if checkSuperUser(log, *upmsg.From) && upmsg.Chat.Type == "private" {
+
+					order = strings.Replace(order, " ", "", -1)
+					orderId, _ := strconv.ParseInt(order, 10, 64)
+					rulelists := getRuleList(orderId)
+					msg.Text = "ID: " + order
+					msg.ParseMode = "Markdown"
+					msg.DisableWebPagePreview = true
+					sendMessage(log, msg)
+					if len(rulelists) > 0 {
+						for _, rlist := range rulelists {
+							msg.Text = rlist
+							msg.ParseMode = "Markdown"
+							msg.DisableWebPagePreview = true
+							sendMessage(log, msg)
+						}
+					} else {
+						msg.Text = "no rules."
+						sendMessage(log, msg)
+					}
+				} else {
+					msg.Text = "need SuperUser and private chat with bot."
+					msg.ParseMode = "Markdown"
+					msg.DisableWebPagePreview = true
+				}
+			} else {
+				rulelists := getRuleList(gid)
+				msg.Text = "ID: " + strconv.FormatInt(gid, 10)
 				msg.ParseMode = "Markdown"
 				msg.DisableWebPagePreview = true
 				sendMessage(log, msg)
+				if len(rulelists) > 0 {
+					for _, rlist := range rulelists {
+						msg.Text = rlist
+						msg.ParseMode = "Markdown"
+						msg.DisableWebPagePreview = true
+						sendMessage(log, msg)
+					}
+				} else {
+					msg.Text = "no rules."
+					sendMessage(log, msg)
+				}
 			}
+
 		}
 	case "admin":
 		msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(uid, 10) + ") 请求管理员出来打屁股\r\n\r\n" + getAdmins(log, gid)
