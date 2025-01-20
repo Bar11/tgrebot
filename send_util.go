@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/chain5j/logger"
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"tg-keyword-reply-bot/db"
@@ -16,10 +14,11 @@ func sendMessage(log logger.Logger, msg api.MessageConfig) api.Message {
 		return api.Message{}
 	}
 	mmsg, err := bot.Send(msg)
-	db.AddMessageRecord(mmsg)
 	if err != nil {
 		log.Error("bot send msg err", "err", err)
+		return mmsg
 	}
+	db.AddMessageRecord(mmsg)
 	// go deleteMessage(log, msg.ChatID, mmsg.MessageID)
 	return mmsg
 }
@@ -28,10 +27,10 @@ func sendMessage(log logger.Logger, msg api.MessageConfig) api.Message {
 func sendPhoto(log logger.Logger, chatId int64, filePath string) api.Message {
 	msg := api.NewPhoto(chatId, api.FileURL(filePath))
 	mmsg, err := bot.Send(msg)
-	db.AddMessageRecord(mmsg)
 	if err != nil {
 		log.Error("bot send photo err", "err", err)
 	}
+	db.AddMessageRecord(mmsg)
 	// go deleteMessage(log, chatId, mmsg.MessageID)
 	return mmsg
 }
@@ -40,10 +39,11 @@ func sendPhoto(log logger.Logger, chatId int64, filePath string) api.Message {
 func sendGif(log logger.Logger, chatId int64, filePath string) api.Message {
 	file := api.NewDocument(chatId, api.FileURL(filePath))
 	mmsg, err := bot.Send(file)
-	db.AddMessageRecord(mmsg)
 	if err != nil {
 		log.Error("bot send gif err", "err", err)
+		return mmsg
 	}
+	db.AddMessageRecord(mmsg)
 	// go deleteMessage(log, chatId, mmsg.MessageID)
 	return mmsg
 }
@@ -52,29 +52,24 @@ func sendGif(log logger.Logger, chatId int64, filePath string) api.Message {
 func sendVideo(log logger.Logger, chatId int64, filePath string) api.Message {
 	file := api.NewVideo(chatId, api.FileURL(filePath))
 	mmsg, err := bot.Send(file)
-	jsonString, _ := json.Marshal(mmsg)
-	fmt.Println(string(jsonString))
-	db.AddMessageRecord(mmsg)
 	if err != nil {
 		log.Error("bot send video err", "err", err)
+		return mmsg
 	}
+	db.AddMessageRecord(mmsg)
 	// go deleteMessage(log, chatId, mmsg.MessageID)
 	return mmsg
 }
 
 // sendFile 发送文件, 必须是已经存在的文件链接
 func sendFile(log logger.Logger, chatId int64, filePath string) api.Message {
-	fmt.Println(filePath)
 	file := api.NewDocument(chatId, api.FilePath(filePath))
 	mmsg, err := bot.Send(file)
-	fmt.Println(err)
-
-	jsonString, _ := json.Marshal(mmsg)
-	fmt.Println(string(jsonString))
-	db.AddMessageRecord(mmsg)
 	if err != nil {
 		log.Error("bot send file err", "err", err)
+		return mmsg
 	}
+	db.AddMessageRecord(mmsg)
 	// go deleteMessage(log, chatId, mmsg.MessageID)
 	return mmsg
 }
