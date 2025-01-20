@@ -22,6 +22,58 @@ func sendMessage(log logger.Logger, msg api.MessageConfig) api.Message {
 	// go deleteMessage(log, msg.ChatID, mmsg.MessageID)
 	return mmsg
 }
+func option2_callback_data() {
+
+}
+
+func SendKeyboardButtonData(log logger.Logger, gid int64, msg api.Message) api.Message {
+	filebuttonCallBackData := "option1"
+	photobuttonCallBackData := "option2"
+	gifbuttonCallBackData := "option3"
+	videobuttonCallBackData := "option4"
+	voicebuttonCallBackData := "option5"
+	filebutton := api.InlineKeyboardButton{
+		Text:         "upload file",
+		CallbackData: &filebuttonCallBackData,
+	}
+	photobutton := api.InlineKeyboardButton{
+		Text:         "upload photo",
+		CallbackData: &photobuttonCallBackData,
+	}
+	gifbutton := api.InlineKeyboardButton{
+		Text:         "upload gif",
+		CallbackData: &gifbuttonCallBackData,
+	}
+	videobutton := api.InlineKeyboardButton{
+		Text:         "upload video",
+		CallbackData: &videobuttonCallBackData,
+	}
+	voicebutton := api.InlineKeyboardButton{
+		Text:         "upload voice",
+		CallbackData: &voicebuttonCallBackData,
+	}
+	keyboard := api.InlineKeyboardMarkup{
+		InlineKeyboard: [][]api.InlineKeyboardButton{
+			{filebutton},
+			api.NewInlineKeyboardRow(gifbutton, photobutton),
+			api.NewInlineKeyboardRow(voicebutton, videobutton),
+		}}
+	mmsg := api.NewMessage(msg.Chat.ID, msg.Text)
+	mmsg.ReplyMarkup = keyboard
+	mmmsg, err := bot.Send(mmsg)
+	if err != nil {
+		log.Error("bot send msg err", "err", err)
+	}
+
+	//keyboard2 := api.ReplyKeyboardRemove{
+	//	RemoveKeyboard: true,
+	//}
+	//mmsg.ReplyMarkup = keyboard2
+	//mmmsg, _ := bot.Send(mmsg)
+
+	return mmmsg
+
+}
 
 // 发送图片消息, 需要是已经存在的图片链接
 func sendPhoto(log logger.Logger, chatId int64, filePath string) api.Message {

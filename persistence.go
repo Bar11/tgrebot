@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	log "github.com/chain5j/log15"
+	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"regexp"
 	"strconv"
 	"strings"
@@ -172,4 +174,37 @@ func findKey(gid int64, input string) string {
 		}
 	}
 	return ""
+}
+
+// 生成图片在"https://api.telegram.org/file/bot"服务器的 url地址
+func GetUrlFromServer(message api.Message, bot *api.BotAPI) string {
+	if message.Photo != nil {
+		photoURL := ""
+		Photo := message.Photo[len(message.Photo)-1]
+		fileID := Photo.FileID
+		file, err := bot.GetFile(api.FileConfig{fileID})
+		if err != nil {
+			log.Info("download  photo failed", "fileID", fileID)
+		} else {
+			photoURL = "https://api.telegram.org/file/bot" + conf.Config().Token + "/" + file.FilePath
+		}
+		return photoURL
+	} else if message.Video != nil {
+		videoURL := ""
+		Video := message.Video
+		fileID := Video.FileID
+		file, err := bot.GetFile(api.FileConfig{fileID})
+		if err != nil {
+			log.Info("download  photo failed", "fileID", fileID)
+		} else {
+			videoURL = "https://api.telegram.org/file/bot" + conf.Config().Token + "/" + file.FilePath
+		}
+		return videoURL
+	} else if message.Document != nil {
+		return ""
+	} else if message.Voice != nil {
+		return ""
+	} else {
+		return ""
+	}
 }

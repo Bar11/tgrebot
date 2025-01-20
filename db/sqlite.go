@@ -1,7 +1,10 @@
 package db
 
 import (
+	log "github.com/chain5j/log15"
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"os"
+	"path/filepath"
 	"tg-keyword-reply-bot/common"
 
 	"github.com/jinzhu/gorm"
@@ -69,6 +72,25 @@ func Init(newToken string) (token string) {
 	}
 	readAllGroupRules()
 	return
+}
+func DownloadPhoto(message api.Message, bot api.BotAPI) {
+	Photo := message.Photo[len(message.Photo)-1]
+	fileID := Photo.FileID
+	file, err := bot.GetFile(api.FileConfig{fileID})
+	if err != nil {
+		log.Info("download  photo failed", "fileID", fileID)
+	}
+	filePath := filepath.Join("db/download/photo", file.FileID)
+	out, err := os.Create(filePath)
+	if err != nil {
+		log.Info("create photo failed", "fileID", fileID)
+	}
+	defer func(out *os.File) {
+		err := out.Close()
+		if err != nil {
+			log.Info("close photo failed", "fileID", fileID)
+		}
+	}(out)
 }
 
 func AddMessageRecord(message api.Message) {

@@ -5,4 +5,5 @@ type Config struct {
 	SuperUserId int64  `json:"super_user_id" mapstructure:"super_user_id" yaml:"super_user_id"`
 	Debug       bool   `json:"debug" mapstructure:"debug" yaml:"debug"`
 	ChanSize    int    `json:"chan_size" mapstructure:"chan_size" yaml:"chan_size"`
+	SaveFile    bool   `json:"save_files" mapstructure:"save_files" yaml:"save_files"`
 }

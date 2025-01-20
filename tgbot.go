@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/panjf2000/ants/v2"
 	"math/rand"
@@ -52,8 +53,11 @@ func start(log logger.Logger, botToken string) {
 // processUpdate 对于每一个update的单独处理
 func processUpdate(log logger.Logger, update *api.Update) {
 	upmsg := update.Message
-	//jsonString, _ := json.Marshal(upmsg)
-	//fmt.Println(string(jsonString))
+	jsonString, _ := json.Marshal(upmsg)
+	fmt.Println(string(jsonString))
+	fmt.Println(upmsg.Photo)
+	fmt.Println(conf.Config().SaveFile)
+	//GetUrlFromServer(*upmsg, bot)
 
 	db.AddMessageRecord(*upmsg)
 	log.Debug("update msg", "msg", upmsg.Text)
@@ -183,6 +187,10 @@ func processCommand(log logger.Logger, update *api.Update) {
 			return
 		}
 		sendMessage(log, msg)
+	case "test":
+		if checkAdmin(log, gid, *upmsg.From) {
+			SendKeyboardButtonData(log, gid, *upmsg)
+		}
 
 	case "add":
 		if checkAdmin(log, gid, *upmsg.From) {
