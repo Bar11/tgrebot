@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/chain5j/logger"
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"tg-keyword-reply-bot/db"
@@ -50,6 +52,8 @@ func sendGif(log logger.Logger, chatId int64, filePath string) api.Message {
 func sendVideo(log logger.Logger, chatId int64, filePath string) api.Message {
 	file := api.NewVideo(chatId, api.FileURL(filePath))
 	mmsg, err := bot.Send(file)
+	jsonString, _ := json.Marshal(mmsg)
+	fmt.Println(string(jsonString))
 	db.AddMessageRecord(mmsg)
 	if err != nil {
 		log.Error("bot send video err", "err", err)
@@ -60,8 +64,13 @@ func sendVideo(log logger.Logger, chatId int64, filePath string) api.Message {
 
 // sendFile 发送文件, 必须是已经存在的文件链接
 func sendFile(log logger.Logger, chatId int64, filePath string) api.Message {
-	file := api.NewDocument(chatId, api.FileURL(filePath))
+	fmt.Println(filePath)
+	file := api.NewDocument(chatId, api.FilePath(filePath))
 	mmsg, err := bot.Send(file)
+	fmt.Println(err)
+
+	jsonString, _ := json.Marshal(mmsg)
+	fmt.Println(string(jsonString))
 	db.AddMessageRecord(mmsg)
 	if err != nil {
 		log.Error("bot send file err", "err", err)
