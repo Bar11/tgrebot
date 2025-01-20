@@ -25,9 +25,6 @@ func sendMessage(log logger.Logger, msg api.MessageConfig) api.Message {
 	// go deleteMessage(log, msg.ChatID, mmsg.MessageID)
 	return mmsg
 }
-func option2_callback_data() {
-
-}
 
 func SendKeyboardButtonData(log logger.Logger, gid int64, msg api.Message) api.Message {
 	filebuttonCallBackData := "option1"
