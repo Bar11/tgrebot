@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	log "github.com/chain5j/log15"
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"regexp"
@@ -151,7 +150,6 @@ func delRule(gid int64, key string) {
 // 获取一个群组所有规则的列表
 func getRuleList(gid int64) []string {
 	kvs := common.AllGroupRules[gid]
-	fmt.Println(kvs)
 	str := ""
 	var strs []string
 	num := 1
