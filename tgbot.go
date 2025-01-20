@@ -158,19 +158,32 @@ func processCommand(log logger.Logger, update *api.Update) {
 		msg.DisableWebPagePreview = true
 		sendMessage(log, msg)
 	case "sensitive":
-		if checkAdmin(log, gid, *upmsg.From) {
-			order := upmsg.CommandArguments()
+		order := upmsg.CommandArguments()
+		if checkSuperUser(log, *upmsg.From) {
 			if order != "" {
 				for _, gid := range common.AllGroupId {
 					addBanRule(gid, order)
+					msg.Text = "敏感词规则添加成功: " + order
 				}
 			} else {
 				msg.Text = addBanText
 				msg.ParseMode = "Markdown"
 				msg.DisableWebPagePreview = true
 			}
-			sendMessage(log, msg)
+		} else if checkAdmin(log, gid, *upmsg.From) {
+			if order != "" {
+				addBanRule(gid, order)
+				msg.Text = "敏感词规则添加成功: " + order
+			} else {
+				msg.Text = addBanText
+				msg.ParseMode = "Markdown"
+				msg.DisableWebPagePreview = true
+			}
+		} else {
+			return
 		}
+		sendMessage(log, msg)
+
 	case "add":
 		if checkAdmin(log, gid, *upmsg.From) {
 			order := upmsg.CommandArguments()
