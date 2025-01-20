@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/chain5j/logger"
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"strings"
 	"tg-keyword-reply-bot/db"
 	"time"
 )
@@ -79,7 +80,12 @@ func SendKeyboardButtonData(log logger.Logger, gid int64, msg api.Message) api.M
 
 // 发送图片消息, 需要是已经存在的图片链接
 func sendPhoto(log logger.Logger, chatId int64, filePath string) api.Message {
-	msg := api.NewPhoto(chatId, api.FileURL(filePath))
+	var msg api.Chattable
+	if strings.HasPrefix(filePath, "http") {
+		msg = api.NewPhoto(chatId, api.FileURL(filePath))
+	} else {
+		msg = api.NewPhoto(chatId, api.FileID(filePath))
+	}
 	mmsg, err := bot.Send(msg)
 	if err != nil {
 		log.Error("bot send photo err", "err", err)
@@ -90,10 +96,33 @@ func sendPhoto(log logger.Logger, chatId int64, filePath string) api.Message {
 	return mmsg
 }
 
+// 发送图片消息, 需要是已经存在的图片链接
+func sendVoice(log logger.Logger, chatId int64, filePath string) api.Message {
+	var msg api.Chattable
+	if strings.HasPrefix(filePath, "http") {
+		msg = api.NewVoice(chatId, api.FileURL(filePath))
+	} else {
+		msg = api.NewVoice(chatId, api.FileID(filePath))
+	}
+	mmsg, err := bot.Send(msg)
+	if err != nil {
+		log.Error("bot send voice err", "err", err)
+		return mmsg
+	}
+	url, messageType := GetUrlFromServer(mmsg, bot)
+	db.AddMessageRecord(mmsg, url, messageType)
+	return mmsg
+}
+
 // sendGif 发送动图, 需要是已经存在的链接
 func sendGif(log logger.Logger, chatId int64, filePath string) api.Message {
-	file := api.NewDocument(chatId, api.FileURL(filePath))
-	mmsg, err := bot.Send(file)
+	var msg api.Chattable
+	if strings.HasPrefix(filePath, "http") {
+		msg = api.NewDocument(chatId, api.FileURL(filePath))
+	} else {
+		msg = api.NewDocument(chatId, api.FileID(filePath))
+	}
+	mmsg, err := bot.Send(msg)
 	if err != nil {
 		log.Error("bot send gif err", "err", err)
 		return mmsg
@@ -106,8 +135,13 @@ func sendGif(log logger.Logger, chatId int64, filePath string) api.Message {
 
 // sendVideo 发送视频, 需要是已经存在的视频连接
 func sendVideo(log logger.Logger, chatId int64, filePath string) api.Message {
-	file := api.NewVideo(chatId, api.FileURL(filePath))
-	mmsg, err := bot.Send(file)
+	var msg api.Chattable
+	if strings.HasPrefix(filePath, "http") {
+		msg = api.NewVideo(chatId, api.FileURL(filePath))
+	} else {
+		msg = api.NewVideo(chatId, api.FileID(filePath))
+	}
+	mmsg, err := bot.Send(msg)
 	if err != nil {
 		log.Error("bot send video err", "err", err)
 		return mmsg
@@ -120,8 +154,13 @@ func sendVideo(log logger.Logger, chatId int64, filePath string) api.Message {
 
 // sendFile 发送文件, 必须是已经存在的文件链接
 func sendFile(log logger.Logger, chatId int64, filePath string) api.Message {
-	file := api.NewDocument(chatId, api.FilePath(filePath))
-	mmsg, err := bot.Send(file)
+	var msg api.Chattable
+	if strings.HasPrefix(filePath, "http") {
+		msg = api.NewDocument(chatId, api.FileURL(filePath))
+	} else {
+		msg = api.NewDocument(chatId, api.FileID(filePath))
+	}
+	mmsg, err := bot.Send(msg)
 	if err != nil {
 		log.Error("bot send file err", "err", err)
 		return mmsg

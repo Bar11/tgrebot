@@ -188,7 +188,7 @@ func GetUrlFromServer(message api.Message, bot *api.BotAPI) (string, string) {
 		if err != nil {
 			log.Info("download  photo failed", "fileID", fileID)
 		} else {
-			photoURL = "https://api.telegram.org/file/bot" + conf.Config().Token + "/" + file.FilePath
+			photoURL = "https://api.telegram.org/file/bot" + conf.Config().Token + "/" + file.FilePath + "||" + file.FileID
 		}
 		return photoURL, Type
 	} else if message.Video != nil {
@@ -200,7 +200,7 @@ func GetUrlFromServer(message api.Message, bot *api.BotAPI) (string, string) {
 		if err != nil {
 			log.Info("download  photo failed", "fileID", fileID)
 		} else {
-			videoURL = "https://api.telegram.org/file/bot" + conf.Config().Token + "/" + file.FilePath
+			videoURL = "https://api.telegram.org/file/bot" + conf.Config().Token + "/" + file.FilePath + "||" + file.FileID
 		}
 		return videoURL, Type
 	} else if message.Document != nil {
@@ -212,7 +212,7 @@ func GetUrlFromServer(message api.Message, bot *api.BotAPI) (string, string) {
 		if err != nil {
 			log.Info("download  photo failed", "fileID", fileID)
 		} else {
-			DocumentURL = "https://api.telegram.org/file/bot" + conf.Config().Token + "/" + file.FilePath
+			DocumentURL = "https://api.telegram.org/file/bot" + conf.Config().Token + "/" + file.FilePath + "||" + file.FileID
 		}
 		return DocumentURL, Type
 	} else if message.Voice != nil {
@@ -224,7 +224,7 @@ func GetUrlFromServer(message api.Message, bot *api.BotAPI) (string, string) {
 		if err != nil {
 			log.Info("download  photo failed", "fileID", fileID)
 		} else {
-			VoiceURL = "https://api.telegram.org/file/bot" + conf.Config().Token + "/" + file.FilePath
+			VoiceURL = "https://api.telegram.org/file/bot" + conf.Config().Token + "/" + file.FilePath + "||" + file.FileID
 		}
 		return VoiceURL, Type
 	} else {

@@ -39,10 +39,10 @@ type messageRecord struct {
 	ForwardDate   int    `json:"forward_date"`
 	ForwardLang   string `json:"forward_lang"`
 	Text          string `json:"text"`
-	Photo         string `json:"photo_path"`
-	Document      string `json:"document_path"`
-	Video         string `json:"video_path"`
-	Voice         string `json:"voice_path"`
+	Photo         string `json:"photo_path"`    //保存url||fileID
+	Document      string `json:"document_path"` //保存url||fileID
+	Video         string `json:"video_path"`    //保存url||fileID
+	Voice         string `json:"voice_path"`    //保存url||fileID
 	ReplyId       int    `json:"reply_id"`
 }
 

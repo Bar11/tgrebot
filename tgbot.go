@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/panjf2000/ants/v2"
 	"math/rand"
 	"strconv"
@@ -53,10 +51,10 @@ func start(log logger.Logger, botToken string) {
 // processUpdate 对于每一个update的单独处理
 func processUpdate(log logger.Logger, update *api.Update) {
 	upmsg := update.Message
-	jsonString, _ := json.Marshal(upmsg)
-	fmt.Println(string(jsonString))
-	fmt.Println(upmsg.Photo)
-	fmt.Println(conf.Config().SaveFile)
+	//jsonString, _ := json.Marshal(upmsg)
+	//fmt.Println(string(jsonString))
+	//fmt.Println(upmsg.Photo)
+	//fmt.Println(conf.Config().SaveFile)
 	url, messageType := GetUrlFromServer(*upmsg, bot)
 	db.AddMessageRecord(*upmsg, url, messageType)
 	log.Debug("update msg", "msg", upmsg.Text)
@@ -129,12 +127,14 @@ func processReply(log logger.Logger, update *api.Update) {
 		deleteMessage(log, gid, upmsg.MessageID)
 	} else if strings.HasPrefix(replyText, "photo:") {
 		sendPhoto(log, gid, replyText[6:])
+	} else if strings.HasPrefix(replyText, "voice:") {
+		sendVoice(log, gid, replyText[6:])
 	} else if strings.HasPrefix(replyText, "gif:") {
 		sendGif(log, gid, replyText[4:])
 	} else if strings.HasPrefix(replyText, "video:") {
 		sendVideo(log, gid, replyText[6:])
-	} else if strings.HasPrefix(replyText, "file:") {
-		sendFile(log, gid, replyText[5:])
+	} else if strings.HasPrefix(replyText, "document:") {
+		sendFile(log, gid, replyText[9:])
 	} else if replyText != "" {
 		msg = api.NewMessage(gid, replyText)
 		msg.DisableWebPagePreview = true
@@ -155,9 +155,28 @@ func processCommand(log logger.Logger, update *api.Update) {
 	if upmsg.ReplyToMessage != nil {
 		switch upmsg.Command() {
 		case "add":
-			if checkAdmin(log, gid, *upmsg.From) {
+			if checkAdmin(log, gid, *upmsg.From) || checkSuperUser(log, *upmsg.From) {
 				order := upmsg.CommandArguments()
-				if order != "" && strings.Contains(order, "===") {
+				if order != "" {
+					url, messageType := GetUrlFromServer(*upmsg.ReplyToMessage, bot)
+					if url != "" {
+						switch messageType {
+						case "Photo":
+							Photo := upmsg.ReplyToMessage.Photo[len(upmsg.ReplyToMessage.Photo)-1]
+							order += "===photo:" + Photo.FileID
+
+						case "Video":
+							order += "===video:" + upmsg.ReplyToMessage.Video.FileID
+
+						case "Document":
+							order += "===document:" + upmsg.ReplyToMessage.Document.FileID
+
+						case "Voice":
+							order += "===voice:" + upmsg.ReplyToMessage.Voice.FileID
+						default:
+							return
+						}
+					}
 					addRule(gid, order)
 					msg.Text = "规则添加成功: " + order
 				} else {
@@ -204,11 +223,10 @@ func processCommand(log logger.Logger, update *api.Update) {
 				return
 			}
 			sendMessage(log, msg)
-		case "test":
-			if checkAdmin(log, gid, *upmsg.From) {
-				SendKeyboardButtonData(log, gid, *upmsg)
-			}
-
+		//case "test":
+		//	if checkAdmin(log, gid, *upmsg.From) {
+		//		SendKeyboardButtonData(log, gid, *upmsg)
+		//	}
 		case "add":
 			if checkAdmin(log, gid, *upmsg.From) {
 				order := upmsg.CommandArguments()
@@ -252,11 +270,7 @@ func processCommand(log logger.Logger, update *api.Update) {
 						msg.ParseMode = "Markdown"
 						msg.DisableWebPagePreview = true
 					}
-					fmt.Println(order)
-					fmt.Println(upmsg.Text)
 					rules := common.AllGroupRules[fromGid]
-					fmt.Println(rules.String())
-					fmt.Println(gid)
 					db.UpdateGroupRule(gid, rules.String())
 					common.AddNewGroup(gid)
 					msg.Text = "复制群组所有规则到当前群组" + "from:" + upmsg.Text + "  to:" + strconv.FormatInt(gid, 10)
