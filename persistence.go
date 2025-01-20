@@ -21,7 +21,15 @@ const (
 		"/addForAll\r\n" + addForAllText +
 		"/delForAll\r\n" + delForAllText +
 		"/copy\r\n" + copyText
-
+	addBanText = "格式要求:\r\n" +
+		"`/sensitive 关键字===封禁时间（-1为永久封禁，单位秒）`\r\n" +
+		"`/sensitive 关键字1||关键字2===封禁时间（-1为永久封禁，单位秒）`\r\n" +
+		"`或者：`\r\n" +
+		"`/sensitive 关键字（永久封禁）`\r\n" +
+		"`/sensitive 关键字1||关键字2（永久封禁）`\r\n" +
+		"例如:\r\n" +
+		"`/sensitive 机场===(60)`\r\n" +
+		"就会添加一条规则, 关键词是机场, 用户发消息包含机场，则会封禁60秒\r\n\r\n"
 	addText = "格式要求:\r\n" +
 		"`/add 关键字===回复内容`\r\n" +
 		"`/add 关键字1||关键字2===回复内容`\r\n" +
@@ -81,6 +89,36 @@ func addRule(gid int64, rule string) {
 		_addOneRule(keys, value, rules)
 	}
 	db.UpdateGroupRule(gid, rules.String())
+}
+
+func addBanRule(gid int64, rule string) {
+	rules := common.AllGroupRules[gid]
+	r := strings.Split(rule, "===")
+	if len(r) < 2 {
+		if strings.Contains(rule, "||") {
+			ks := strings.Split(rule, "||")
+			for _, key := range ks {
+				_addOneRule(key, "ban:9999999999999", rules)
+			}
+		} else {
+			_addOneRule(rule, "ban:9999999999999", rules)
+		}
+	} else {
+		keys, value := r[0], r[1]
+		if strings.Contains(keys, "||") {
+			ks := strings.Split(keys, "||")
+			_, err := strconv.ParseInt(value, 10, 64)
+			if err != nil {
+				return
+			}
+			for _, key := range ks {
+				_addOneRule(key, "ban:"+value, rules)
+			}
+		} else {
+			_addOneRule(keys, "ban:"+value, rules)
+		}
+	}
+
 }
 
 // 给addRule使用的辅助方法

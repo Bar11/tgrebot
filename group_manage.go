@@ -75,8 +75,12 @@ func banMember(log logger.Logger, gid int64, uid int64, sec int64) {
 	chatPermissions := &api.ChatPermissions{
 		CanSendMessages:       false,
 		CanSendMediaMessages:  false,
+		CanSendPolls:          false,
 		CanSendOtherMessages:  false,
 		CanAddWebPagePreviews: false,
+		CanChangeInfo:         false,
+		CanInviteUsers:        false,
+		CanPinMessages:        false,
 	}
 	restricconfig := api.RestrictChatMemberConfig{
 		ChatMemberConfig: chatuserconfig,
@@ -92,12 +96,16 @@ func unbanMember(log logger.Logger, gid int64, uid int64) {
 	chatPermissions := &api.ChatPermissions{
 		CanSendMessages:       true,
 		CanSendMediaMessages:  true,
+		CanSendPolls:          true,
 		CanSendOtherMessages:  true,
 		CanAddWebPagePreviews: true,
+		CanChangeInfo:         true,
+		CanInviteUsers:        true,
+		CanPinMessages:        true,
 	}
 	restricconfig := api.RestrictChatMemberConfig{
 		ChatMemberConfig: chatuserconfig,
-		UntilDate:        9999999999999,
+		UntilDate:        time.Now().Unix(),
 		Permissions:      chatPermissions,
 	}
 	_, _ = bot.Send(restricconfig)
