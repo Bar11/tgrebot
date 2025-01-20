@@ -149,185 +149,205 @@ func processCommand(log logger.Logger, update *api.Update) {
 	gid := upmsg.Chat.ID
 	uid := upmsg.From.ID
 	msg := api.NewMessage(update.Message.Chat.ID, "")
-	_ = api.NewDeleteMessage(update.Message.Chat.ID, upmsg.MessageID)
-	log.Info("bot delete the msg", "gid", gid, "uid", uid, "mid", upmsg.MessageID)
-	switch upmsg.Command() {
-	case "start":
-		msg.Text = "本机器人能够自动回复特定关键词"
-		sendMessage(log, msg)
-	case "help":
-		msg.Text = helpText
-		msg.ParseMode = "Markdown"
-		msg.DisableWebPagePreview = true
-		sendMessage(log, msg)
-	case "sensitive":
-		order := upmsg.CommandArguments()
-		if checkSuperUser(log, *upmsg.From) {
-			if order != "" {
-				for _, gid := range common.AllGroupId {
-					addBanRule(gid, order)
-					msg.Text = "敏感词规则添加成功: " + order
-				}
-			} else {
-				msg.Text = addBanText
-				msg.ParseMode = "Markdown"
-				msg.DisableWebPagePreview = true
-			}
-		} else if checkAdmin(log, gid, *upmsg.From) {
-			if order != "" {
-				addBanRule(gid, order)
-				msg.Text = "敏感词规则添加成功: " + order
-			} else {
-				msg.Text = addBanText
-				msg.ParseMode = "Markdown"
-				msg.DisableWebPagePreview = true
-			}
-		} else {
-			return
-		}
-		sendMessage(log, msg)
-	case "test":
-		if checkAdmin(log, gid, *upmsg.From) {
-			SendKeyboardButtonData(log, gid, *upmsg)
-		}
-
-	case "add":
-		if checkAdmin(log, gid, *upmsg.From) {
-			order := upmsg.CommandArguments()
-			if order != "" {
-				addRule(gid, order)
-				msg.Text = "规则添加成功: " + order
-			} else {
-				msg.Text = addText
-				msg.ParseMode = "Markdown"
-				msg.DisableWebPagePreview = true
-			}
-			sendMessage(log, msg)
-		}
-	case "addForAll":
-		if checkSuperUser(log, *upmsg.From) {
-			order := upmsg.CommandArguments()
-			if order != "" {
-				for _, gid := range common.AllGroupId {
+	//_ = api.NewDeleteMessage(update.Message.Chat.ID, upmsg.MessageID)
+	//log.Info("bot delete the msg", "gid", gid, "uid", uid, "mid", upmsg.MessageID)
+	// 上传发送的本地文件（包含图片、语音、视频、文档）
+	if upmsg.ReplyToMessage != nil {
+		switch upmsg.Command() {
+		case "add":
+			if checkAdmin(log, gid, *upmsg.From) {
+				order := upmsg.CommandArguments()
+				if order != "" && strings.Contains(order, "===") {
 					addRule(gid, order)
-				}
-				msg.Text = "为所有群组、好友，添加规则成功: " + order
-			} else {
-				msg.Text = addForAllText
-				msg.ParseMode = "Markdown"
-				msg.DisableWebPagePreview = true
-			}
-			sendMessage(log, msg)
-		} else {
-			msg.Text = "该命令仅适用超级管理员"
-			msg.ParseMode = "Markdown"
-			msg.DisableWebPagePreview = true
-			sendMessage(log, msg)
-		}
-	case "copy":
-		if checkSuperUser(log, *upmsg.From) {
-			order := upmsg.CommandArguments()
-			if order != "" {
-				fromGid, err := strconv.ParseInt(order, 10, 64)
-				if err != nil {
-					msg.Text = "复制的群组ID有误"
+					msg.Text = "规则添加成功: " + order
+				} else {
+					msg.Text = addText
 					msg.ParseMode = "Markdown"
 					msg.DisableWebPagePreview = true
 				}
-				fmt.Println(order)
-				fmt.Println(upmsg.Text)
-				rules := common.AllGroupRules[fromGid]
-				fmt.Println(rules.String())
-				fmt.Println(gid)
-				db.UpdateGroupRule(gid, rules.String())
-				common.AddNewGroup(gid)
-				msg.Text = "复制群组所有规则到当前群组" + "from:" + upmsg.Text + "  to:" + strconv.FormatInt(gid, 10)
-			} else {
-				msg.Text = copyText
-				msg.ParseMode = "Markdown"
-				msg.DisableWebPagePreview = true
+				sendMessage(log, msg)
 			}
+		}
+	} else {
+		switch upmsg.Command() {
+		case "start":
+			msg.Text = "本机器人能够自动回复特定关键词"
 			sendMessage(log, msg)
-		} else {
-			msg.Text = "该命令仅适用超级管理员"
+		case "help":
+			msg.Text = helpText
 			msg.ParseMode = "Markdown"
 			msg.DisableWebPagePreview = true
 			sendMessage(log, msg)
-		}
-	case "del":
-		if checkAdmin(log, gid, *upmsg.From) {
+		case "sensitive":
 			order := upmsg.CommandArguments()
-			if order != "" {
-				delRule(gid, order)
-				msg.Text = "规则删除成功: " + order
-			} else {
-				msg.Text = delText
-				msg.ParseMode = "Markdown"
-			}
-			sendMessage(log, msg)
-		}
-	case "delForAll":
-		if checkSuperUser(log, *upmsg.From) {
-			order := upmsg.CommandArguments()
-			if order != "" {
-				for _, gid := range common.AllGroupId {
-					delRule(gid, order)
+			if checkSuperUser(log, *upmsg.From) {
+				if order != "" {
+					for _, gid := range common.AllGroupId {
+						addBanRule(gid, order)
+						msg.Text = "敏感词规则添加成功: " + order
+					}
+				} else {
+					msg.Text = addBanText
+					msg.ParseMode = "Markdown"
+					msg.DisableWebPagePreview = true
 				}
-				msg.Text = "为所有群组或好友，删除规则成功: " + order
+			} else if checkAdmin(log, gid, *upmsg.From) {
+				if order != "" {
+					addBanRule(gid, order)
+					msg.Text = "敏感词规则添加成功: " + order
+				} else {
+					msg.Text = addBanText
+					msg.ParseMode = "Markdown"
+					msg.DisableWebPagePreview = true
+				}
 			} else {
-				msg.Text = delForAllText
-				msg.ParseMode = "Markdown"
+				return
 			}
 			sendMessage(log, msg)
-		} else {
-			msg.Text = "该命令仅适用超级管理员"
-			msg.ParseMode = "Markdown"
-			msg.DisableWebPagePreview = true
-			sendMessage(log, msg)
-		}
-	case "list":
-		if checkAdmin(log, gid, *upmsg.From) {
-			rulelists := getRuleList(gid)
-			msg.Text = "ID: " + strconv.FormatInt(gid, 10)
-			msg.ParseMode = "Markdown"
-			msg.DisableWebPagePreview = true
-			sendMessage(log, msg)
-			for _, rlist := range rulelists {
-				msg.Text = rlist
+		case "test":
+			if checkAdmin(log, gid, *upmsg.From) {
+				SendKeyboardButtonData(log, gid, *upmsg)
+			}
+
+		case "add":
+			if checkAdmin(log, gid, *upmsg.From) {
+				order := upmsg.CommandArguments()
+				if order != "" && strings.Contains(order, "===") {
+					addRule(gid, order)
+					msg.Text = "规则添加成功: " + order
+				} else {
+					msg.Text = addText
+					msg.ParseMode = "Markdown"
+					msg.DisableWebPagePreview = true
+				}
+				sendMessage(log, msg)
+			}
+		case "addForAll":
+			if checkSuperUser(log, *upmsg.From) {
+				order := upmsg.CommandArguments()
+				if order != "" && strings.Contains(order, "===") {
+					for _, gid := range common.AllGroupId {
+						addRule(gid, order)
+					}
+					msg.Text = "为所有群组、好友，添加规则成功: " + order
+				} else {
+					msg.Text = addForAllText
+					msg.ParseMode = "Markdown"
+					msg.DisableWebPagePreview = true
+				}
+				sendMessage(log, msg)
+			} else {
+				msg.Text = "该命令仅适用超级管理员"
 				msg.ParseMode = "Markdown"
 				msg.DisableWebPagePreview = true
 				sendMessage(log, msg)
 			}
-		}
-	case "admin":
-		msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(uid, 10) + ") 请求管理员出来打屁股\r\n\r\n" + getAdmins(log, gid)
-		msg.ParseMode = "Markdown"
-		sendMessage(log, msg)
-		banMember(log, gid, uid, 30)
-	case "banme":
-		botme, _ := bot.GetChatMember(api.GetChatMemberConfig{ChatConfigWithUser: api.ChatConfigWithUser{ChatID: gid, UserID: bot.Self.ID}})
-		if botme.CanRestrictMembers {
-			rand.Seed(time.Now().UnixNano())
-			sec := rand.Intn(540) + 60
-			banMember(log, gid, uid, int64(sec))
-			msg.Text = "恭喜[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ")获得" + strconv.Itoa(sec) + "秒的禁言礼包"
+		case "copy":
+			if checkSuperUser(log, *upmsg.From) {
+				order := upmsg.CommandArguments()
+				if order != "" {
+					fromGid, err := strconv.ParseInt(order, 10, 64)
+					if err != nil {
+						msg.Text = "复制的群组ID有误"
+						msg.ParseMode = "Markdown"
+						msg.DisableWebPagePreview = true
+					}
+					fmt.Println(order)
+					fmt.Println(upmsg.Text)
+					rules := common.AllGroupRules[fromGid]
+					fmt.Println(rules.String())
+					fmt.Println(gid)
+					db.UpdateGroupRule(gid, rules.String())
+					common.AddNewGroup(gid)
+					msg.Text = "复制群组所有规则到当前群组" + "from:" + upmsg.Text + "  to:" + strconv.FormatInt(gid, 10)
+				} else {
+					msg.Text = copyText
+					msg.ParseMode = "Markdown"
+					msg.DisableWebPagePreview = true
+				}
+				sendMessage(log, msg)
+			} else {
+				msg.Text = "该命令仅适用超级管理员"
+				msg.ParseMode = "Markdown"
+				msg.DisableWebPagePreview = true
+				sendMessage(log, msg)
+			}
+		case "del":
+			if checkAdmin(log, gid, *upmsg.From) {
+				order := upmsg.CommandArguments()
+				if order != "" {
+					delRule(gid, order)
+					msg.Text = "规则删除成功: " + order
+				} else {
+					msg.Text = delText
+					msg.ParseMode = "Markdown"
+				}
+				sendMessage(log, msg)
+			}
+		case "delForAll":
+			if checkSuperUser(log, *upmsg.From) {
+				order := upmsg.CommandArguments()
+				if order != "" {
+					for _, gid := range common.AllGroupId {
+						delRule(gid, order)
+					}
+					msg.Text = "为所有群组或好友，删除规则成功: " + order
+				} else {
+					msg.Text = delForAllText
+					msg.ParseMode = "Markdown"
+				}
+				sendMessage(log, msg)
+			} else {
+				msg.Text = "该命令仅适用超级管理员"
+				msg.ParseMode = "Markdown"
+				msg.DisableWebPagePreview = true
+				sendMessage(log, msg)
+			}
+		case "list":
+			if checkAdmin(log, gid, *upmsg.From) {
+				rulelists := getRuleList(gid)
+				msg.Text = "ID: " + strconv.FormatInt(gid, 10)
+				msg.ParseMode = "Markdown"
+				msg.DisableWebPagePreview = true
+				sendMessage(log, msg)
+				for _, rlist := range rulelists {
+					msg.Text = rlist
+					msg.ParseMode = "Markdown"
+					msg.DisableWebPagePreview = true
+					sendMessage(log, msg)
+				}
+			}
+		case "admin":
+			msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(uid, 10) + ") 请求管理员出来打屁股\r\n\r\n" + getAdmins(log, gid)
 			msg.ParseMode = "Markdown"
-		} else {
-			msg.Text = "请给我禁言权限,否则无法进行游戏"
+			sendMessage(log, msg)
+			banMember(log, gid, uid, 30)
+		case "banme":
+			botme, _ := bot.GetChatMember(api.GetChatMemberConfig{ChatConfigWithUser: api.ChatConfigWithUser{ChatID: gid, UserID: bot.Self.ID}})
+			if botme.CanRestrictMembers {
+				rand.Seed(time.Now().UnixNano())
+				sec := rand.Intn(540) + 60
+				banMember(log, gid, uid, int64(sec))
+				msg.Text = "恭喜[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ")获得" + strconv.Itoa(sec) + "秒的禁言礼包"
+				msg.ParseMode = "Markdown"
+			} else {
+				msg.Text = "请给我禁言权限,否则无法进行游戏"
+			}
+			sendMessage(log, msg)
+		case "me":
+			myuser := upmsg.From
+			msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ") 的账号信息" +
+				"\r\nID: " + strconv.Itoa(int(uid)) +
+				"\r\nUseName: [" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ")" +
+				"\r\nLastName: " + myuser.LastName +
+				"\r\nFirstName: " + myuser.FirstName +
+				"\r\nIsBot: " + strconv.FormatBool(myuser.IsBot)
+			msg.ParseMode = "Markdown"
+			sendMessage(log, msg)
+		default:
 		}
-		sendMessage(log, msg)
-	case "me":
-		myuser := upmsg.From
-		msg.Text = "[" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ") 的账号信息" +
-			"\r\nID: " + strconv.Itoa(int(uid)) +
-			"\r\nUseName: [" + upmsg.From.String() + "](tg://user?id=" + strconv.FormatInt(upmsg.From.ID, 10) + ")" +
-			"\r\nLastName: " + myuser.LastName +
-			"\r\nFirstName: " + myuser.FirstName +
-			"\r\nIsBot: " + strconv.FormatBool(myuser.IsBot)
-		msg.ParseMode = "Markdown"
-		sendMessage(log, msg)
-	default:
 	}
+
 }
 
 // processReplyCommand 回复指令处理
