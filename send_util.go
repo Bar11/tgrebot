@@ -18,7 +18,7 @@ func sendMessage(log logger.Logger, msg api.MessageConfig) api.Message {
 	if err != nil {
 		log.Error("bot send msg err", "err", err)
 	}
-	go deleteMessage(log, msg.ChatID, mmsg.MessageID)
+	// go deleteMessage(log, msg.ChatID, mmsg.MessageID)
 	return mmsg
 }
 
@@ -30,7 +30,7 @@ func sendPhoto(log logger.Logger, chatId int64, filePath string) api.Message {
 	if err != nil {
 		log.Error("bot send photo err", "err", err)
 	}
-	go deleteMessage(log, chatId, mmsg.MessageID)
+	// go deleteMessage(log, chatId, mmsg.MessageID)
 	return mmsg
 }
 
@@ -42,7 +42,7 @@ func sendGif(log logger.Logger, chatId int64, filePath string) api.Message {
 	if err != nil {
 		log.Error("bot send gif err", "err", err)
 	}
-	go deleteMessage(log, chatId, mmsg.MessageID)
+	// go deleteMessage(log, chatId, mmsg.MessageID)
 	return mmsg
 }
 
@@ -54,7 +54,7 @@ func sendVideo(log logger.Logger, chatId int64, filePath string) api.Message {
 	if err != nil {
 		log.Error("bot send video err", "err", err)
 	}
-	go deleteMessage(log, chatId, mmsg.MessageID)
+	// go deleteMessage(log, chatId, mmsg.MessageID)
 	return mmsg
 }
 
@@ -66,12 +66,12 @@ func sendFile(log logger.Logger, chatId int64, filePath string) api.Message {
 	if err != nil {
 		log.Error("bot send file err", "err", err)
 	}
-	go deleteMessage(log, chatId, mmsg.MessageID)
+	// go deleteMessage(log, chatId, mmsg.MessageID)
 	return mmsg
 }
 
 // deleteMessage 删除消息
 func deleteMessage(log logger.Logger, gid int64, mid int) {
-	time.Sleep(time.Second * 240)
-	_ = api.NewDeleteMessage(gid, mid)
+	time.Sleep(time.Second)
+	_, _ = bot.Send(api.NewDeleteMessage(gid, mid))
 }
