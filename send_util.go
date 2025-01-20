@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/chain5j/logger"
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"strings"
@@ -10,6 +11,7 @@ import (
 
 // 发送文字消息
 func sendMessage(log logger.Logger, msg api.MessageConfig) api.Message {
+	fmt.Println(msg.Text)
 	if msg.Text == "" {
 		log.Debug("message is nil")
 		return api.Message{}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	log "github.com/chain5j/log15"
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"regexp"
@@ -42,7 +41,7 @@ const (
 		"`/local 关键字1||关键字2`\r\n" +
 		"例如:" +
 		"先发送一个本地的图片、视频、语音、文件消息，\r\n" +
-		"reply图片、视频、语音、文件消息`/add 机场`\r\n" +
+		"reply图片、视频、语音、文件消息`/local 机场`\r\n" +
 		"就会添加一条规则, 关键词是机场, 回复的内容是之前发送的本地的图片、视频、语音、文件\r\n\r\n"
 	addForAllText = "权限要求:\r\n" +
 		"超级管理员\r\n" +
@@ -167,7 +166,6 @@ func getRuleList(gid int64) []string {
 // 查询是否包含相应的自动回复规则
 func findKey(gid int64, input string) string {
 	kvs := common.AllGroupRules[gid]
-	fmt.Println("AllGroupRules:", kvs)
 	for keyword, reply := range kvs {
 		if strings.HasPrefix(keyword, "re:") {
 			keyword = keyword[3:]

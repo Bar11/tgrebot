@@ -1,12 +1,10 @@
 package db
 
 import (
-	log "github.com/chain5j/log15"
+	log "github.com/chain5j/logger"
 	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite" // 初始化gorm使用sqlite
-	"os"
-	"path/filepath"
 	"tg-keyword-reply-bot/common"
 )
 
@@ -20,8 +18,10 @@ type setting struct {
 
 type rule struct {
 	gorm.Model
-	GroupId  int64 `gorm:"unique;not null"`
-	RuleJson string
+	GroupId   int64 `gorm:"unique;not null"`
+	RuleJson  string
+	ChatTitle string
+	ChatType  string
 }
 
 type messageRecord struct {
@@ -50,7 +50,7 @@ type messageRecord struct {
 func Init(newToken string) (token string) {
 	dbtmp, err := gorm.Open("sqlite3", "data.db")
 	if err != nil {
-		panic("failed to connect database")
+		log.Panic("failed to connect database")
 	}
 	db = dbtmp
 	db.AutoMigrate(&setting{}, &rule{}, &messageRecord{})
@@ -71,25 +71,6 @@ func Init(newToken string) (token string) {
 	}
 	readAllGroupRules()
 	return
-}
-func DownloadPhoto(message api.Message, bot api.BotAPI) {
-	Photo := message.Photo[len(message.Photo)-1]
-	fileID := Photo.FileID
-	file, err := bot.GetFile(api.FileConfig{fileID})
-	if err != nil {
-		log.Info("download  photo failed", "fileID", fileID)
-	}
-	filePath := filepath.Join("db/download/photo", file.FileID)
-	out, err := os.Create(filePath)
-	if err != nil {
-		log.Info("create photo failed", "fileID", fileID)
-	}
-	defer func(out *os.File) {
-		err := out.Close()
-		if err != nil {
-			log.Info("close photo failed", "fileID", fileID)
-		}
-	}(out)
 }
 
 // 记录聊天信息
@@ -146,11 +127,26 @@ func AddMessageRecord(message api.Message, url string, msgType string) {
 }
 
 // AddNewGroup 数据库中添加一条记录来记录新群组的规则
-func AddNewGroup(groupId int64) {
+func AddNewGroup(groupId int64, title string, types string) {
+	if types == "private" {
+		title = ""
+	}
 	db.Create(&rule{
-		GroupId:  groupId,
-		RuleJson: "",
+		GroupId:   groupId,
+		ChatTitle: title,
+		ChatType:  types,
+		RuleJson:  "",
 	})
+}
+
+func GetAllGroup(log log.Logger) ([]rule, error) {
+	var rules []rule
+	if err := db.Find(&rules).Error; err != nil {
+		log.Error("查询rules表时出错: %v", err)
+		return rules, err
+	}
+	return rules, nil
+
 }
 
 // UpdateGroupRule 更新群组的规则

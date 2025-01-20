@@ -1,14 +1,12 @@
 package main
 
 import (
+	"github.com/chain5j/logger"
+	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"strconv"
+	"tg-keyword-reply-bot/common"
 	"time"
 	"unicode"
-
-	"github.com/chain5j/logger"
-	"tg-keyword-reply-bot/common"
-
-	api "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func checkSuperUser(log logger.Logger, user api.User) bool {
