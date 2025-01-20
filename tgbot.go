@@ -238,7 +238,7 @@ func processCommand(log logger.Logger, update *api.Update) {
 		if checkSuperUser(log, *upmsg.From) && upmsg.Chat.Type == "private" {
 			rules, err := db.GetAllGroup(log)
 			if err != nil {
-				sendMessage(log, msg)
+				log.Error("GetAllGroup DB Error")
 			} else {
 				for _, r := range rules {
 					msg.Text += r.ChatTitle + ", " + strconv.FormatInt(r.GroupId, 10) + ", " + r.ChatType + "\r\n"
@@ -247,9 +247,10 @@ func processCommand(log logger.Logger, update *api.Update) {
 				msg.DisableWebPagePreview = true
 			}
 		} else {
-			msg.Text = allChatText
+			msg.Text = "need SuperUser and private chat with bot."
 			msg.ParseMode = "Markdown"
 			msg.DisableWebPagePreview = true
+			//deleteMessage(log, gid, upmsg.MessageID)
 		}
 		sendMessage(log, msg)
 	case "add":
@@ -289,17 +290,40 @@ func processCommand(log logger.Logger, update *api.Update) {
 		if checkSuperUser(log, *upmsg.From) {
 			order := upmsg.CommandArguments()
 			if order != "" {
-				fromGid, err := strconv.ParseInt(order, 10, 64)
-				if err != nil {
-					msg.Text = "复制的群组ID有误"
-					msg.ParseMode = "Markdown"
-					msg.DisableWebPagePreview = true
+				order = strings.Replace(order, " ", "", -1)
+				//新增 copy to 逻辑
+				gids := strings.Split(order, "to")
+				if len(gids) == 2 {
+					fromGid, err := strconv.ParseInt(gids[0], 10, 64)
+					if err != nil {
+						msg.Text = "复制的群组ID有误"
+						msg.ParseMode = "Markdown"
+						msg.DisableWebPagePreview = true
+					} else {
+						Gid, _ := strconv.ParseInt(gids[1], 10, 64)
+						rules := common.AllGroupRules[fromGid]
+						db.UpdateGroupRule(Gid, rules.String())
+						common.AddNewGroup(Gid)
+						common.AllGroupRules[Gid] = rules
+						msg.Text = "Copy all rules of the group to " + gids[1] + "from " + gids[0]
+					}
+
+				} else {
+					fromGid, err := strconv.ParseInt(order, 10, 64)
+					if err != nil {
+						msg.Text = "复制的群组ID有误"
+						msg.ParseMode = "Markdown"
+						msg.DisableWebPagePreview = true
+					} else {
+
+						rules := common.AllGroupRules[fromGid]
+						db.UpdateGroupRule(gid, rules.String())
+						common.AddNewGroup(gid)
+						common.AllGroupRules[gid] = rules
+						msg.Text = "Copy all rules of the group to the current group " + "from " + order
+					}
 				}
-				rules := common.AllGroupRules[fromGid]
-				db.UpdateGroupRule(gid, rules.String())
-				common.AddNewGroup(gid)
-				common.AllGroupRules[gid] = rules
-				msg.Text = "复制群组所有规则到当前群组" + "from:" + order + "  to:" + strconv.FormatInt(gid, 10)
+
 			} else {
 				msg.Text = copyText
 				msg.ParseMode = "Markdown"
@@ -371,6 +395,8 @@ func processCommand(log logger.Logger, update *api.Update) {
 					msg.Text = "need SuperUser and private chat with bot."
 					msg.ParseMode = "Markdown"
 					msg.DisableWebPagePreview = true
+					sendMessage(log, msg)
+					deleteMessage(log, gid, upmsg.MessageID)
 				}
 			} else {
 				rulelists := getRuleList(gid)
