@@ -26,10 +26,10 @@ func checkAdmin(log logger.Logger, gid int64, user api.User) bool {
 
 	admins, _ := bot.GetChatAdministrators(api.ChatAdministratorsConfig{ChatConfig: api.ChatConfig{ChatID: gid, SuperGroupUsername: ""}})
 	uid := user.ID
-	if conf.Config().SuperUserId > 0 && uid == conf.Config().SuperUserId {
-		log.Info("user is super user", "uid", uid)
-		return true
-	}
+	//if conf.Config().SuperUserId > 0 && uid == conf.Config().SuperUserId {
+	//	log.Info("user is super user", "uid", uid)
+	//	return true
+	//}
 	for _, user := range admins {
 		if uid == user.User.ID {
 			log.Info("user is group admin", "uid", uid)
